@@ -569,13 +569,11 @@ def load_modules(db, force_demo=False, status=None, update_module=False):
         registry.updated_modules += processed_modules
 
         # STEP 10: Run modules 'post_startup_hook'
-        _logger.info("Running 'post_startup_hook'")
         for index, package in enumerate(graph, 1):
             py_module = sys.modules['odoo.addons.%s' % (package.name,)]
-            function = package.info.get('post_startup_hook')
-            if function:
-                _logger.info("Running hook by '" + package.name + "' module")
-                getattr(py_module, function)(cr)
+            post_startup = package.info.get('post_startup_hook')
+            if post_startup:
+                getattr(py_module, post_startup)(cr)
 
 def reset_modules_state(db_name):
     """
