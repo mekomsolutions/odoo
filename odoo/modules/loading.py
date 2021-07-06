@@ -608,6 +608,13 @@ def load_modules(registry, force_demo=False, status=None, update_module=False):
         env.flush_all()
 
 
+        # STEP 10: Run modules 'post_startup_hook'
+        for index, package in enumerate(graph, 1):
+            py_module = sys.modules['odoo.addons.%s' % (package.name,)]
+            post_startup = package.info.get('post_startup_hook')
+            if post_startup:
+                getattr(py_module, post_startup)(cr)
+
 def reset_modules_state(db_name):
     """
     Resets modules flagged as "to x" to their original state
