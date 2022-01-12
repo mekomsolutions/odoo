@@ -11,7 +11,7 @@ from odoo.osv import expression
 from odoo.tools import DEFAULT_SERVER_DATETIME_FORMAT
 from odoo.tools.float_utils import float_is_zero
 from odoo.exceptions import AccessError, UserError, ValidationError
-from odoo.tools.misc import formatLang, get_lang
+from odoo.tools.misc import formatLang, get_lang, format_amount
 
 
 class PurchaseOrder(models.Model):
@@ -28,9 +28,10 @@ class PurchaseOrder(models.Model):
                 line._compute_amount()
                 amount_untaxed += line.price_subtotal
                 amount_tax += line.price_tax
+            currency = order.currency_id or order.partner_id.property_purchase_currency_id or self.env.company.currency_id
             order.update({
-                'amount_untaxed': order.currency_id.round(amount_untaxed),
-                'amount_tax': order.currency_id.round(amount_tax),
+                'amount_untaxed': currency.round(amount_untaxed),
+                'amount_tax': currency.round(amount_tax),
                 'amount_total': amount_untaxed + amount_tax,
             })
 
@@ -420,7 +421,7 @@ class PurchaseOrder(models.Model):
                 if inv and inv.state not in ('cancel', 'draft'):
                     raise UserError(_("Unable to cancel this purchase order. You must first cancel the related vendor bills."))
 
-        self.write({'state': 'cancel'})
+        self.write({'state': 'cancel', 'mail_reminder_confirmed': False})
 
     def button_unlock(self):
         self.write({'state': 'purchase'})
@@ -551,7 +552,7 @@ class PurchaseOrder(models.Model):
             'move_type': move_type,
             'narration': self.notes,
             'currency_id': self.currency_id.id,
-            'invoice_user_id': self.user_id and self.user_id.id,
+            'invoice_user_id': self.user_id and self.user_id.id or self.env.user.id,
             'partner_id': partner_invoice_id,
             'fiscal_position_id': (self.fiscal_position_id or self.fiscal_position_id.get_fiscal_position(partner_invoice_id)).id,
             'payment_reference': self.partner_ref or '',
@@ -647,19 +648,18 @@ class PurchaseOrder(models.Model):
         # This is done via SQL for scalability reasons
         query = """SELECT AVG(COALESCE(po.amount_total / NULLIF(po.currency_rate, 0), po.amount_total)),
                           AVG(extract(epoch from age(po.date_approve,po.create_date)/(24*60*60)::decimal(16,2))),
-                          SUM(CASE WHEN po.date_approve >= %s THEN COALESCE(po.amount_total / NULLIF(po.currency_rate, 0), po.amount_total) ELSE 0 END),
-                          MIN(curr.decimal_places)
+                          SUM(CASE WHEN po.date_approve >= %s THEN COALESCE(po.amount_total / NULLIF(po.currency_rate, 0), po.amount_total) ELSE 0 END)
                    FROM purchase_order po
                    JOIN res_company comp ON (po.company_id = comp.id)
-                   JOIN res_currency curr ON (comp.currency_id = curr.id)
                    WHERE po.state in ('purchase', 'done')
                      AND po.company_id = %s
                 """
         self._cr.execute(query, (one_week_ago, self.env.company.id))
         res = self.env.cr.fetchone()
-        result['all_avg_order_value'] = round(res[0] or 0, res[3])
         result['all_avg_days_to_purchase'] = round(res[1] or 0, 2)
-        result['all_total_last_7_days'] = round(res[2] or 0, res[3])
+        currency = self.env.company.currency_id
+        result['all_avg_order_value'] = format_amount(self.env, res[0] or 0, currency)
+        result['all_total_last_7_days'] = format_amount(self.env, res[2] or 0, currency)
 
         return result
 
@@ -808,8 +808,8 @@ class PurchaseOrderLine(models.Model):
     price_tax = fields.Float(compute='_compute_amount', string='Tax', store=True)
 
     order_id = fields.Many2one('purchase.order', string='Order Reference', index=True, required=True, ondelete='cascade')
-    account_analytic_id = fields.Many2one('account.analytic.account', store=True, string='Analytic Account', compute='_compute_analytic_id_and_tag_ids', readonly=False)
-    analytic_tag_ids = fields.Many2many('account.analytic.tag', store=True, string='Analytic Tags', compute='_compute_analytic_id_and_tag_ids', readonly=False)
+    account_analytic_id = fields.Many2one('account.analytic.account', store=True, string='Analytic Account', compute='_compute_account_analytic_id', readonly=False)
+    analytic_tag_ids = fields.Many2many('account.analytic.tag', store=True, string='Analytic Tags', compute='_compute_analytic_tag_ids', readonly=False)
     company_id = fields.Many2one('res.company', related='order_id.company_id', string='Company', store=True, readonly=True)
     state = fields.Selection(related='order_id.state', store=True, readonly=False)
 
@@ -990,17 +990,30 @@ class PurchaseOrderLine(models.Model):
         return self._convert_to_middle_of_day(date_planned)
 
     @api.depends('product_id', 'date_order')
-    def _compute_analytic_id_and_tag_ids(self):
+    def _compute_account_analytic_id(self):
         for rec in self:
-            default_analytic_account = rec.env['account.analytic.default'].sudo().account_get(
-                product_id=rec.product_id.id,
-                partner_id=rec.order_id.partner_id.id,
-                user_id=rec.env.uid,
-                date=rec.date_order,
-                company_id=rec.company_id.id,
-            )
-            rec.account_analytic_id = rec.account_analytic_id or default_analytic_account.analytic_id
-            rec.analytic_tag_ids = rec.analytic_tag_ids or default_analytic_account.analytic_tag_ids
+            if not rec.account_analytic_id:
+                default_analytic_account = rec.env['account.analytic.default'].sudo().account_get(
+                    product_id=rec.product_id.id,
+                    partner_id=rec.order_id.partner_id.id,
+                    user_id=rec.env.uid,
+                    date=rec.date_order,
+                    company_id=rec.company_id.id,
+                )
+                rec.account_analytic_id = default_analytic_account.analytic_id
+
+    @api.depends('product_id', 'date_order')
+    def _compute_analytic_tag_ids(self):
+        for rec in self:
+            if not rec.analytic_tag_ids:
+                default_analytic_account = rec.env['account.analytic.default'].sudo().account_get(
+                    product_id=rec.product_id.id,
+                    partner_id=rec.order_id.partner_id.id,
+                    user_id=rec.env.uid,
+                    date=rec.date_order,
+                    company_id=rec.company_id.id,
+                )
+                rec.analytic_tag_ids = default_analytic_account.analytic_tag_ids
 
     @api.onchange('product_id')
     def onchange_product_id(self):
@@ -1093,6 +1106,8 @@ class PurchaseOrderLine(models.Model):
             price_unit = seller.product_uom._compute_price(price_unit, self.product_uom)
 
         self.price_unit = price_unit
+        product_ctx = {'seller_id': seller.id, 'lang': get_lang(self.env, self.partner_id.lang).code}
+        self.name = self._get_product_purchase_description(self.product_id.with_context(product_ctx))
 
     @api.depends('product_uom', 'product_qty', 'product_id.uom_id')
     def _compute_product_uom_qty(self):
@@ -1127,6 +1142,8 @@ class PurchaseOrderLine(models.Model):
 
     def _prepare_account_move_line(self, move=False):
         self.ensure_one()
+        aml_currency = move and move.currency_id or self.currency_id
+        date = move and move.date or fields.Date.today()
         res = {
             'display_type': self.display_type,
             'sequence': self.sequence,
@@ -1134,7 +1151,7 @@ class PurchaseOrderLine(models.Model):
             'product_id': self.product_id.id,
             'product_uom_id': self.product_uom.id,
             'quantity': self.qty_to_invoice,
-            'price_unit': self.price_unit,
+            'price_unit': self.currency_id._convert(self.price_unit, aml_currency, self.company_id, date, round=False),
             'tax_ids': [(6, 0, self.taxes_id.ids)],
             'analytic_account_id': self.account_analytic_id.id,
             'analytic_tag_ids': [(6, 0, self.analytic_tag_ids.ids)],
@@ -1196,7 +1213,7 @@ class PurchaseOrderLine(models.Model):
             lang=partner.lang,
             partner_id=partner.id,
         )
-        name = product_lang.display_name
+        name = product_lang.with_context(seller_id=seller.id).display_name
         if product_lang.description_purchase:
             name += '\n' + product_lang.description_purchase
 
@@ -1217,7 +1234,9 @@ class PurchaseOrderLine(models.Model):
         """Return a datetime which is the noon of the input date(time) according
         to order user's time zone, convert to UTC time.
         """
-        return timezone(self.order_id.user_id.tz or self.company_id.partner_id.tz or 'UTC').localize(datetime.combine(date, time(12))).astimezone(UTC).replace(tzinfo=None)
+        tz = timezone(self.order_id.user_id.tz or self.company_id.partner_id.tz or 'UTC')
+        date = date.astimezone(tz) # date is UTC, applying the offset could change the day
+        return tz.localize(datetime.combine(date, time(12))).astimezone(UTC).replace(tzinfo=None)
 
     def _update_date_planned(self, updated_date):
         self.date_planned = updated_date

@@ -6,7 +6,7 @@ import logging
 from psycopg2 import Error, OperationalError
 
 from odoo import _, api, fields, models
-from odoo.exceptions import UserError, ValidationError
+from odoo.exceptions import RedirectWarning, UserError, ValidationError
 from odoo.osv import expression
 from odoo.tools.float_utils import float_compare, float_is_zero, float_round
 
@@ -134,8 +134,9 @@ class StockQuant(models.Model):
         """Handle the "on_hand" filter, indirectly calling `_get_domain_locations`."""
         if operator not in ['=', '!='] or not isinstance(value, bool):
             raise UserError(_('Operation not supported'))
-        domain_loc = self.env['product.product']._get_domain_locations()[0]
-        quant_ids = [l['id'] for l in self.env['stock.quant'].search_read(domain_loc, ['id'])]
+        domain_loc = self.env['product.product'].with_context(compute_child=False)._get_domain_locations()[0]
+        location_ids = self.env['stock.location']._search([('id', 'child_of', domain_loc[0][2])])
+        quant_ids = self.env['stock.quant']._search([('location_id', 'in', location_ids)])
         if (operator == '!=' and value is True) or (operator == '=' and value is False):
             domain_operator = 'not in'
         else:
@@ -471,7 +472,16 @@ class StockQuant(models.Model):
             # if we want to unreserve
             available_quantity = sum(quants.mapped('reserved_quantity'))
             if float_compare(abs(quantity), available_quantity, precision_rounding=rounding) > 0:
-                raise UserError(_('It is not possible to unreserve more products of %s than you have in stock.', product_id.display_name))
+                action_fix_unreserve = self.env.ref(
+                    'stock.stock_quant_stock_move_line_desynchronization', raise_if_not_found=False)
+                if action_fix_unreserve and self.user_has_groups('base.group_system'):
+                    raise RedirectWarning(
+                        _("""It is not possible to unreserve more products of %s than you have in stock.
+The correction could unreserve some operations with problematics products.""", product_id.display_name),
+                        action_fix_unreserve.id,
+                        _('Automated action to fix it'))
+                else:
+                    raise UserError(_('It is not possible to unreserve more products of %s than you have in stock. Contact an administrator.', product_id.display_name))
         else:
             return reserved_quants
 
@@ -712,7 +722,7 @@ class QuantPackage(models.Model):
         else:
             packs = self.search([('quant_ids', operator, value)])
         if packs:
-            return [('id', 'parent_of', packs.ids)]
+            return [('id', 'in', packs.ids)]
         else:
             return [('id', '=', False)]
 

@@ -345,6 +345,7 @@ class Foo(models.Model):
     name = fields.Char()
     value1 = fields.Integer(change_default=True)
     value2 = fields.Integer()
+    text = fields.Char(trim=False)
 
 
 class Bar(models.Model):
@@ -355,6 +356,8 @@ class Bar(models.Model):
     foo = fields.Many2one('test_new_api.foo', compute='_compute_foo', search='_search_foo')
     value1 = fields.Integer(related='foo.value1', readonly=False)
     value2 = fields.Integer(related='foo.value2', readonly=False)
+    text1 = fields.Char('Text1', related='foo.text', readonly=False)
+    text2 = fields.Char('Text2', related='foo.text', readonly=False, trim=True)
 
     @api.depends('name')
     def _compute_foo(self):
@@ -453,6 +456,8 @@ class Move(models.Model):
 
     line_ids = fields.One2many('test_new_api.move_line', 'move_id', domain=[('visible', '=', True)])
     quantity = fields.Integer(compute='_compute_quantity', store=True)
+    tag_id = fields.Many2one('test_new_api.multi.tag')
+    tag_name = fields.Char(related='tag_id.name')
 
     @api.depends('line_ids.quantity')
     def _compute_quantity(self):
@@ -469,6 +474,40 @@ class MoveLine(models.Model):
     quantity = fields.Integer()
 
 
+class Payment(models.Model):
+    _name = 'test_new_api.payment'
+    _description = 'Payment inherits from Move'
+    _inherits = {'test_new_api.move': 'move_id'}
+
+    move_id = fields.Many2one('test_new_api.move', required=True, ondelete='cascade')
+
+
+class Order(models.Model):
+    _name = _description = 'test_new_api.order'
+
+    line_ids = fields.One2many('test_new_api.order.line', 'order_id')
+
+
+class OrderLine(models.Model):
+    _name = _description = 'test_new_api.order.line'
+
+    order_id = fields.Many2one('test_new_api.order', required=True, ondelete='cascade')
+    product = fields.Char()
+    reward = fields.Boolean()
+
+    def unlink(self):
+        # also delete associated reward lines
+        reward_lines = [
+            other_line
+            for line in self
+            if not line.reward
+            for other_line in line.order_id.line_ids
+            if other_line.reward and other_line.product == line.product
+        ]
+        self = self.union(*reward_lines)
+        return super().unlink()
+
+
 class CompanyDependent(models.Model):
     _name = 'test_new_api.company'
     _description = 'Test New API Company'
@@ -477,6 +516,9 @@ class CompanyDependent(models.Model):
     date = fields.Date(company_dependent=True)
     moment = fields.Datetime(company_dependent=True)
     tag_id = fields.Many2one('test_new_api.multi.tag', company_dependent=True)
+    truth = fields.Boolean(company_dependent=True)
+    count = fields.Integer(company_dependent=True)
+    phi = fields.Float(company_dependent=True, digits=(2, 5))
 
 
 class CompanyDependentAttribute(models.Model):

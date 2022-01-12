@@ -10,20 +10,20 @@
 # Martin Trigaux, 2020
 # Maidu Targama <m.targama@gmail.com>, 2020
 # Andre Roomet <andreroomet@gmail.com>, 2021
-# Eneli Õigus <enelioigus@gmail.com>, 2021
 # Arma Gedonsky <armagedonsky@hot.ee>, 2021
 # Piia Paurson <piia@avalah.ee>, 2021
 # Algo Kärp <algokarp@gmail.com>, 2021
 # Martin Talts <martin.t@avalah.ee>, 2021
 # Triine Aavik <triine@avalah.ee>, 2021
+# Eneli Õigus <enelioigus@gmail.com>, 2021
 # 
 msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server 14.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2020-12-04 15:13+0000\n"
+"POT-Creation-Date: 2022-01-07 14:40+0000\n"
 "PO-Revision-Date: 2020-09-07 08:20+0000\n"
-"Last-Translator: Triine Aavik <triine@avalah.ee>, 2021\n"
+"Last-Translator: Eneli Õigus <enelioigus@gmail.com>, 2021\n"
 "Language-Team: Estonian (https://www.transifex.com/odoo/teams/41243/et/)\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -49,6 +49,24 @@ msgstr "\" teavita"
 #, python-format
 msgid "\"URL to\" can not be empty."
 msgstr "\"sihtkoha URL\" ei saa olla tühi."
+
+#. module: website
+#: code:addons/website/models/website_rewrite.py:0
+#, python-format
+msgid "\"URL to\" cannot contain parameter %s which is not used in \"URL from\"."
+msgstr ""
+
+#. module: website
+#: code:addons/website/models/website_rewrite.py:0
+#, python-format
+msgid "\"URL to\" is invalid: %s"
+msgstr ""
+
+#. module: website
+#: code:addons/website/models/website_rewrite.py:0
+#, python-format
+msgid "\"URL to\" must contain parameter %s used in \"URL from\"."
+msgstr ""
 
 #. module: website
 #: code:addons/website/models/website_rewrite.py:0
@@ -104,17 +122,6 @@ msgid "&amp;lt;head&amp;gt;"
 msgstr "&amp;lt;head&amp;gt;"
 
 #. module: website
-#: model_terms:ir.ui.view,arch_db:website.sitemap_index_xml
-#: model_terms:ir.ui.view,arch_db:website.sitemap_xml
-msgid "&lt;?xml version=\"1.0\" encoding=\"UTF-8\"?&gt;"
-msgstr "&lt;?xml version=\"1.0\" encoding=\"UTF-8\"?&gt;"
-
-#. module: website
-#: model_terms:ir.ui.view,arch_db:website.default_xml
-msgid "&lt;?xml version=\"1.0\" encoding=\"utf-8\"?&gt;"
-msgstr "&lt;?xml version=\"1.0\" encoding=\"utf-8\"?&gt;"
-
-#. module: website
 #. openerp-web
 #: code:addons/website/static/src/xml/website.xml:0
 #, python-format
@@ -166,8 +173,8 @@ msgstr ""
 #: model_terms:ir.ui.view,arch_db:website.template_header_hamburger_oe_structure_header_hamburger_3
 #: model_terms:ir.ui.view,arch_db:website.template_header_sidebar_oe_structure_header_sidebar_1
 #: model_terms:ir.ui.view,arch_db:website.template_header_vertical_oe_structure_header_vertical_2
-msgid "+1 (650) 691-3277"
-msgstr "+1 (650) 691-3277"
+msgid "+1 (650) 555-0111"
+msgstr ""
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.show_website_info
@@ -198,11 +205,6 @@ msgstr ""
 #: model_terms:ir.ui.view,arch_db:website.s_timeline
 msgid "...and switch the timeline contents to fit your needs."
 msgstr "...ja vahetab ära ajajoone sisu, et sobida teie vajadustega."
-
-#. module: website
-#: model_terms:ir.ui.view,arch_db:website.default_csv
-msgid "1,2,3"
-msgstr "1,2,3"
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.s_media_list_options
@@ -360,7 +362,6 @@ msgstr "<b>Lisa</b> valitud pilt."
 
 #. module: website
 #. openerp-web
-#: code:addons/website/static/src/js/tours/homepage.js:0
 #: code:addons/website/static/src/js/tours/tour_utils.js:0
 #, python-format
 msgid "<b>Click Edit</b> to start designing your homepage."
@@ -379,17 +380,6 @@ msgstr "<b>Vajutage lõigule</b>, et selle valikute menüüsse pääseda."
 #, python-format
 msgid "<b>Click on a text</b> to start editing it."
 msgstr "<b>Vajutage tekstile</b>, et seda muuta."
-
-#. module: website
-#. openerp-web
-#: code:addons/website/static/src/js/tours/homepage.js:0
-#, python-format
-msgid ""
-"<b>Click on a text</b> to start editing it. <i>It's that easy to edit your "
-"content!</i>"
-msgstr ""
-"<b>Vajutage tekstile</b> selle muutmiseks. <i>Oma sisu on täpselt nii lihtne"
-" muuta!</i>"
 
 #. module: website
 #. openerp-web
@@ -495,17 +485,6 @@ msgstr "<b>Liigutage</b> seda nuppu, et muuta %s polsterdust"
 #, python-format
 msgid "<b>Slide</b> this button to change the column size."
 msgstr "<b>Liigutage</b> seda nuppu veeru suuruse muutmiseks."
-
-#. module: website
-#. openerp-web
-#: code:addons/website/static/src/js/tours/homepage.js:0
-#, python-format
-msgid ""
-"<b>That's it!</b><p>Your page is all set to go live. Click the "
-"<b>Publish</b> button to publish it on the website.</p>"
-msgstr ""
-"<b>See on kõik!</b><p>Teie leht on valmis laivi minemiseks. <b>Avalda</b> "
-"nupp avaldab selle veebilehele.</p>"
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.view_edit_robots
@@ -744,31 +723,6 @@ msgid "<i>Instant setup, satisfied or reimbursed.</i>"
 msgstr "<i>Kohene seadistus, tasutud või hüvitatud .</i>"
 
 #. module: website
-#. openerp-web
-#: code:addons/website/static/src/js/tours/homepage.js:0
-#, python-format
-msgid "<p><b>Click here</b> to create a new page.</p>"
-msgstr "<p><b>Vajutage siia</b>uue lehe loomiseks.</p>"
-
-#. module: website
-#. openerp-web
-#: code:addons/website/static/src/js/tours/homepage.js:0
-#, python-format
-msgid ""
-"<p><b>Your homepage is live.</b></p><p>Let's add a new page for your "
-"site.</p>"
-msgstr ""
-"<p><b>Teie koduleht on laivis.</b></p><p>Lisame teie lehele uue "
-"lehekülje.</p>"
-
-#. module: website
-#. openerp-web
-#: code:addons/website/static/src/js/tours/homepage.js:0
-#, python-format
-msgid "<p>Enter a title for the page.</p>"
-msgstr "<p>Lisage leheküljele pealkiri.</p>"
-
-#. module: website
 #: model_terms:ir.ui.view,arch_db:website.template_header_magazine_oe_structure_header_magazine_1
 msgid "<small class=\"s_share_title d-none\"><b>Follow us</b></small>"
 msgstr "<small class=\"s_share_title d-none\"><b>Jägi meid</b></small>"
@@ -902,6 +856,13 @@ msgid ""
 msgstr ""
 "<span class=\"o_add_images\" style=\"cursor: pointer;\"><i class=\"fa fa-"
 "plus-circle\"/> Lisa pilte</span>"
+
+#. module: website
+#: model_terms:ir.ui.view,arch_db:website.layout
+msgid ""
+"<span class=\"o_footer_copyright_name mr-2\">Copyright &amp;copy; Company "
+"name</span>"
+msgstr ""
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.res_config_settings_view_form
@@ -1044,8 +1005,8 @@ msgid ""
 "                    <span class=\"css_unpublish\">Published</span>"
 msgstr ""
 "<span/>\n"
-"                    <span class=\"css_publish\">Avaldamata</span>\n"
-"                    <span class=\"css_unpublish\">Avaldatud</span>"
+"                    <span class=\"css_publish\">Avalikustamata</span>\n"
+"                    <span class=\"css_unpublish\">Avalikustatud</span>"
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.snippets
@@ -1204,7 +1165,7 @@ msgstr "Tegevus"
 #: code:addons/website/static/src/js/backend/res_config_settings.js:0
 #, python-format
 msgid "Activate anyway"
-msgstr ""
+msgstr "Aktiveeri sellegipoolest"
 
 #. module: website
 #: model:ir.model.fields,field_description:website.field_theme_ir_ui_view__active
@@ -1246,14 +1207,14 @@ msgstr "Lisa võimalusi"
 #: code:addons/website/static/src/xml/website.contentMenu.xml:0
 #, python-format
 msgid "Add Mega Menu Item"
-msgstr "Lisa Mega menüü kirje"
+msgstr "Lisa alam-valikutega menüü kirje"
 
 #. module: website
 #. openerp-web
 #: code:addons/website/static/src/xml/website.contentMenu.xml:0
 #, python-format
 msgid "Add Menu Item"
-msgstr "Lisa menüükirje"
+msgstr "Lisa menüü"
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.s_tabs_options
@@ -1288,14 +1249,14 @@ msgstr "Lisa suurepärane lööklause."
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.s_product_catalog
 msgid "Add a menu description."
-msgstr "Lisa menüükirjeldus."
+msgstr "Lisa menüü kirjeldus."
 
 #. module: website
 #. openerp-web
 #: code:addons/website/static/src/js/menu/content.js:0
 #, python-format
 msgid "Add a menu item"
-msgstr "Lisa menüükirje"
+msgstr "Lisa menüü"
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.res_config_settings_view_form
@@ -1339,13 +1300,6 @@ msgstr "Aadress"
 #: model_terms:ir.ui.view,arch_db:website.cookie_policy
 msgid "Advertising &amp; Marketing"
 msgstr "Reklaam &amp; Turundus"
-
-#. module: website
-#. openerp-web
-#: code:addons/website/static/src/js/tours/homepage.js:0
-#, python-format
-msgid "After having checked how it looks on mobile, <b>close the preview</b>."
-msgstr "Peale mobiiliivaate kontrollimist, <b>sulge eelvaade</b>."
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.bs_debug_view
@@ -1594,6 +1548,7 @@ msgid ""
 "Automatically opens the pop-up if the user stays on a page longer than the "
 "specified time."
 msgstr ""
+"Avab automaatselt pop-upi, kui kasutaja jääb lehele määratud ajast kauemaks."
 
 #. module: website
 #: model:ir.model.fields,field_description:website.field_website__auto_redirect_lang
@@ -1873,7 +1828,7 @@ msgstr "Call-to-action"
 #: model:ir.model.fields,field_description:website.field_website_published_multi_mixin__can_publish
 #: model:ir.model.fields,field_description:website.field_website_snippet_filter__can_publish
 msgid "Can Publish"
-msgstr "Võib avaldada"
+msgstr "Võib avalikustada"
 
 #. module: website
 #. openerp-web
@@ -2017,7 +1972,7 @@ msgstr "Kontrollige oma seadistust."
 #. openerp-web
 #: code:addons/website/static/src/js/editor/snippets.editor.js:0
 #, python-format
-msgid "Check your connexion and try again"
+msgid "Check your connection and try again"
 msgstr ""
 
 #. module: website
@@ -2111,24 +2066,9 @@ msgid "Click on"
 msgstr "Vajutage"
 
 #. module: website
-#. openerp-web
-#: code:addons/website/static/src/js/tours/homepage.js:0
-#, python-format
-msgid "Click on <b>Continue</b> to create the page."
-msgstr "Vajutage <b>Jätka</b>, et lehte luua."
-
-#. module: website
 #: model_terms:ir.ui.view,arch_db:website.s_process_steps
 msgid "Click on the icon to adapt it <br/>to your purpose."
 msgstr "Vajutage ikoonil, et see kohandada <br/>oma eesmärgiga."
-
-#. module: website
-#. openerp-web
-#: code:addons/website/static/src/js/tours/homepage.js:0
-#: code:addons/website/static/src/js/tours/homepage.js:0
-#, python-format
-msgid "Click the <b>Save</b> button."
-msgstr "Vajutage <b>Salvesta</b> nupule."
 
 #. module: website
 #. openerp-web
@@ -2268,7 +2208,7 @@ msgstr "Kinnitusviis"
 #: code:addons/website/static/src/xml/website.backend.xml:0
 #, python-format
 msgid "Connect Google Analytics"
-msgstr "Ühendage Google Analüütikaga"
+msgstr "Ühenda Google Analytics'iga"
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.footer_custom
@@ -2290,6 +2230,7 @@ msgstr "Kontakt"
 #. module: website
 #: code:addons/website/models/website.py:0
 #: model_terms:ir.ui.view,arch_db:website.res_config_settings_view_form
+#: model_terms:ir.ui.view,arch_db:website.s_banner
 #: model_terms:ir.ui.view,arch_db:website.template_header_boxed_oe_structure_header_boxed_2
 #: model_terms:ir.ui.view,arch_db:website.template_header_default_oe_structure_header_default_1
 #: model_terms:ir.ui.view,arch_db:website.template_header_hamburger_oe_structure_header_hamburger_1
@@ -2436,7 +2377,9 @@ msgid "Countdown is over - Firework"
 msgstr "Lugemine on lõppenud  - Ilutulestik"
 
 #. module: website
+#: code:addons/website/models/website.py:0
 #: model:ir.filters,name:website.dynamic_snippet_country_filter
+#, python-format
 msgid "Countries"
 msgstr "Riigid"
 
@@ -2625,17 +2568,6 @@ msgstr "Kohanda"
 #: model:ir.model.fields,field_description:website.field_theme_ir_ui_view__customize_show
 msgid "Customize Show"
 msgstr "Customize Show"
-
-#. module: website
-#. openerp-web
-#: code:addons/website/static/src/js/tours/homepage.js:0
-#, python-format
-msgid ""
-"Customize any block through this menu. Try to change the background color of"
-" this block."
-msgstr ""
-"Kohandage siit menüüst ükskõik millist blokki. Proovige muuta selle bloki "
-"taustavärvi."
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.s_countdown_options
@@ -3023,12 +2955,7 @@ msgstr "Kuva see veebileht, kui kasutajad külastavad seda domeeni"
 #: code:addons/website/static/src/js/backend/res_config_settings.js:0
 #, python-format
 msgid "Do not activate"
-msgstr ""
-
-#. module: website
-#: model_terms:ir.ui.view,arch_db:website.s_banner
-msgid "Do something"
-msgstr "Tee midagi"
+msgstr "Ärge aktiveerige"
 
 #. module: website
 #. openerp-web
@@ -3095,32 +3022,11 @@ msgstr "Sõõrik"
 
 #. module: website
 #. openerp-web
-#: code:addons/website/static/src/js/tours/homepage.js:0
-#, python-format
-msgid "Drag another block in your page, below the cover."
-msgstr "Lohista järgmine blokk oma lehele, kaane alla."
-
-#. module: website
-#. openerp-web
 #: code:addons/website/static/src/js/tours/tour_utils.js:0
 #, python-format
 msgid ""
-"Drag the <b>%s</b> building block and drop it at the bottom of your page."
-msgstr "Lohita <b>%s</b> ehitusblokki ning kukuta see oma lehe alla."
-
-#. module: website
-#. openerp-web
-#: code:addons/website/static/src/js/tours/homepage.js:0
-#, python-format
-msgid "Drag the <i>Cover</i> block and drop it in your page."
-msgstr "Lohista <i>Kaane</i> blokki ja lisa see oma lehele."
-
-#. module: website
-#. openerp-web
-#: code:addons/website/static/src/js/tours/homepage.js:0
-#, python-format
-msgid "Drag the block and drop it in your new page."
-msgstr "Lohista blokki ja lisa see oma uue lehe peale."
+"Drag the <b>%s</b> building block and drop it at the bottom of the page."
+msgstr ""
 
 #. module: website
 #. openerp-web
@@ -3316,7 +3222,7 @@ msgstr "Võimalda oma Google projektis arveldamist"
 #: code:addons/website/static/src/js/editor/snippets.editor.js:0
 #, python-format
 msgid "Enter an API Key"
-msgstr ""
+msgstr "Sisestage API võti"
 
 #. module: website
 #. openerp-web
@@ -3774,13 +3680,6 @@ msgstr "Mine leheküljele"
 
 #. module: website
 #. openerp-web
-#: code:addons/website/static/src/js/tours/homepage.js:0
-#, python-format
-msgid "Go back to the blocks menu."
-msgstr "Mine tagasi blokkide menüüsse"
-
-#. module: website
-#. openerp-web
 #: code:addons/website/static/src/xml/website.backend.xml:0
 #, python-format
 msgid "Go to"
@@ -3805,7 +3704,7 @@ msgstr "Mine lehekülje hadurisse"
 #: model_terms:ir.ui.view,arch_db:website.res_config_settings_view_form
 #, python-format
 msgid "Go to Website"
-msgstr "Mine veebisaidile"
+msgstr "Mine veebilehele"
 
 #. module: website
 #. openerp-web
@@ -3813,17 +3712,6 @@ msgstr "Mine veebisaidile"
 #, python-format
 msgid "Go to the Options tab"
 msgstr "Mine valikute vahelehele"
-
-#. module: website
-#. openerp-web
-#: code:addons/website/static/src/js/tours/homepage.js:0
-#, python-format
-msgid ""
-"Good Job! You have designed your homepage. Let's check how this page looks "
-"like on <b>mobile devices</b>."
-msgstr ""
-"Hea töö! Kujundasite oma kodulehe. Kontrollime, kuidas see leht näeb välja "
-"<b>mobiilseadmetes</b>."
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.s_carousel
@@ -4559,11 +4447,6 @@ msgid "Installing \"%s\""
 msgstr "\"%s\" installimine"
 
 #. module: website
-#: model_terms:ir.actions.act_window,help:website.website_visitors_action
-msgid "Interact with them by sending them messages."
-msgstr "Suhtle nendega, saates neile sõnum."
-
-#. module: website
 #: model_terms:ir.ui.view,arch_db:website.cookie_policy
 msgid "Interaction History"
 msgstr "Suhtluse ajalugu"
@@ -4578,7 +4461,7 @@ msgstr "Intuitiivne süsteem"
 #: code:addons/website/static/src/js/editor/snippets.editor.js:0
 #, python-format
 msgid "Invalid API Key. The following error was returned by Google:"
-msgstr ""
+msgstr "Kehtetu API võti. Järgmine error saabus Google'i poolt tagasi:"
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.s_company_team
@@ -4625,7 +4508,7 @@ msgstr "On mega menüü"
 #: model:ir.model.fields,field_description:website.field_website_snippet_filter__is_published
 #: model_terms:ir.ui.view,arch_db:website.website_pages_tree_view
 msgid "Is Published"
-msgstr "On avaldatud"
+msgstr "On avalikustatud"
 
 #. module: website
 #: model:ir.model.fields,field_description:website.field_website_menu__is_visible
@@ -4668,17 +4551,6 @@ msgstr ""
 #, python-format
 msgid "It looks like your file is being called by"
 msgstr "Tundub, et teie faili kutsutakse"
-
-#. module: website
-#. openerp-web
-#: code:addons/website/static/src/js/content/website_root.js:0
-#, python-format
-msgid ""
-"It might be possible to edit the relevant items or fix the issue in <a "
-"href=\"%s\">the classic Odoo interface</a>"
-msgstr ""
-"On võimalik muuta olulisi üksusi või parandada probleemi <a "
-"href=\"%s\">klassikalises Odoo kasutajaliideses</a>"
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.bs_debug_view
@@ -5091,7 +4963,7 @@ msgstr "Reaalajas eelvaatus"
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.user_navbar
 msgid "Livechat Widget"
-msgstr "Livechat Widget"
+msgstr "Online vestluse aken"
 
 #. module: website
 #. openerp-web
@@ -5144,12 +5016,12 @@ msgstr "Peamised tegevused"
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.user_navbar
 msgid "Manage Pages"
-msgstr "Lehekülgede haldamine"
+msgstr "Muuda lehekülgi"
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.list_website_pages
 msgid "Manage Your Pages"
-msgstr "Oma lehekülgede haldamine"
+msgstr "Halda oma lehekülgi"
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.user_navbar
@@ -5230,7 +5102,7 @@ msgstr "Menüü kirje %s"
 #: code:addons/website/static/src/js/menu/content.js:0
 #, python-format
 msgid "Menu Label"
-msgstr "Menüü silt"
+msgstr "Menüü nimi"
 
 #. module: website
 #: model:ir.model.fields,field_description:website.field_theme_website_menu__copy_ids
@@ -5562,7 +5434,7 @@ msgstr "Tavaline"
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.one_page_line
 msgid "Not SEO optimized"
-msgstr "Not SEO optimized"
+msgstr "SEO optimeerimata"
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.one_page_line
@@ -5578,7 +5450,7 @@ msgstr "Indekseerimata"
 #: model_terms:ir.ui.view,arch_db:website.one_page_line
 #: model_terms:ir.ui.view,arch_db:website.website_pages_view_search
 msgid "Not published"
-msgstr "Avaldamata"
+msgstr "Avalikustamata"
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.website_pages_view_search
@@ -5733,12 +5605,12 @@ msgstr "Open Source ERP"
 #: model_terms:ir.ui.view,arch_db:website.user_navbar
 #, python-format
 msgid "Optimize SEO"
-msgstr "Optimiseeri SEO"
+msgstr "SEO optimeerimine"
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.one_page_line
 msgid "Optimize SEO of this page"
-msgstr "Optimiseeri selle lehe SEO"
+msgstr "Selle lehe SEO optimeerimine"
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.s_comparisons
@@ -5831,7 +5703,7 @@ msgstr "Lehe paigutus"
 #: code:addons/website/static/src/xml/website.xml:0
 #, python-format
 msgid "Page Name"
-msgstr "lje nimi"
+msgstr "Lehekülje nimi"
 
 #. module: website
 #. openerp-web
@@ -5839,7 +5711,7 @@ msgstr "lje nimi"
 #: model_terms:ir.ui.view,arch_db:website.user_navbar
 #, python-format
 msgid "Page Properties"
-msgstr "Lehekülje omadused"
+msgstr "Lehekülje seaded"
 
 #. module: website
 #. openerp-web
@@ -5890,7 +5762,7 @@ msgstr "Lehe vaated"
 #: model_terms:ir.ui.view,arch_db:website.website_visitor_page_view_search
 #, python-format
 msgid "Pages"
-msgstr "Lehekülgi"
+msgstr "Leheküljed"
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.bs_debug_view
@@ -6134,12 +6006,12 @@ msgstr "Edasiminekuriba kaal"
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.user_navbar
 msgid "Promote"
-msgstr "Reklaami"
+msgstr "Turundus"
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.user_navbar
 msgid "Promote page on the web"
-msgstr "Promo lehte veebis"
+msgstr "Turunda lehte veebis"
 
 #. module: website
 #. openerp-web
@@ -6165,7 +6037,7 @@ msgstr "Avalik kasutaja"
 #: code:addons/website/static/src/xml/website.pageProperties.xml:0
 #, python-format
 msgid "Publish"
-msgstr "Avalda"
+msgstr "Avalikusta"
 
 #. module: website
 #. openerp-web
@@ -6177,14 +6049,14 @@ msgstr "Avalda"
 #: model_terms:ir.ui.view,arch_db:website.website_pages_view_search
 #, python-format
 msgid "Published"
-msgstr "Avaldatud"
+msgstr "Avalikustatud"
 
 #. module: website
 #. openerp-web
 #: code:addons/website/static/src/js/content/website_root.js:0
 #, python-format
 msgid "Published with success."
-msgstr "Avaldatud edukalt."
+msgstr "Edukalt avalikustatud."
 
 #. module: website
 #. openerp-web
@@ -6192,7 +6064,7 @@ msgstr "Avaldatud edukalt."
 #: model:ir.model.fields,field_description:website.field_website_page__date_publish
 #, python-format
 msgid "Publishing Date"
-msgstr "Avaldamise kuupäev"
+msgstr "Avalikustamise kuupäev"
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.cookie_policy
@@ -6369,7 +6241,7 @@ msgstr "Taasta eelmine versioon (pehme reset)."
 #: model:ir.model.fields,help:website.field_website_published_multi_mixin__website_id
 #: model:ir.model.fields,help:website.field_website_snippet_filter__website_id
 msgid "Restrict publishing to this website."
-msgstr "Avaldage ainult see veebileht"
+msgstr "Avalikustage ainult see veebileht"
 
 #. module: website
 #: model:res.groups,name:website.group_website_publisher
@@ -6470,7 +6342,7 @@ msgstr "SEO metadata"
 #: model:ir.model.fields,field_description:website.field_website_seo_metadata__is_seo_optimized
 #: model_terms:ir.ui.view,arch_db:website.one_page_line
 msgid "SEO optimized"
-msgstr "SEO optimized"
+msgstr "SEO optimeeritud"
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.s_features_grid
@@ -6800,7 +6672,7 @@ msgstr "Näita sisselogimist"
 #: code:addons/website/static/src/xml/website.pageProperties.xml:0
 #, python-format
 msgid "Show in Top Menu"
-msgstr "Näita ülemises menüüs"
+msgstr "Näita ülemiste menüüde hulgas"
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.s_popup_options
@@ -6828,7 +6700,7 @@ msgstr "Logi sisse"
 #: model:ir.model.fields.selection,name:website.selection__ir_ui_view__visibility__connected
 #, python-format
 msgid "Signed In"
-msgstr "Sisse logitud"
+msgstr "Sisseloginud kasutajatele"
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.res_config_settings_view_form
@@ -6947,7 +6819,7 @@ msgstr "Solid"
 #: code:addons/website/static/src/xml/website.pageProperties.xml:0
 #, python-format
 msgid "Some Users"
-msgstr "Mõned kasutajad"
+msgstr "Ainult valitud kasutad"
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.bs_debug_view
@@ -7555,7 +7427,7 @@ msgstr "See lehekülg on menüüs <b>%s</b>"
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.one_page_line
 msgid "This page will be published on {{ date_formatted }}"
-msgstr "See lehekülg avaldatakse {{ date_formatted }}"
+msgstr "See lehekülg avalikustatakse {{ date_formatted }}"
 
 #. module: website
 #. openerp-web
@@ -7930,7 +7802,7 @@ msgstr "Piiramatu kohandus"
 #: code:addons/website/static/src/js/backend/button.js:0
 #, python-format
 msgid "Unpublish"
-msgstr "Eemalda avaldatu"
+msgstr "Ära avalikusta"
 
 #. module: website
 #. openerp-web
@@ -7940,7 +7812,7 @@ msgstr "Eemalda avaldatu"
 #: model_terms:ir.ui.view,arch_db:website.publish_short
 #, python-format
 msgid "Unpublished"
-msgstr "Avaldamata"
+msgstr "Avalikustamata"
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.theme_view_kanban
@@ -8164,7 +8036,7 @@ msgstr "Video"
 #: model:ir.model.fields,field_description:website.field_theme_website_page__view_id
 #: model:ir.model.fields,field_description:website.field_website_page__view_id
 msgid "View"
-msgstr "Vaade"
+msgstr "Ava"
 
 #. module: website
 #: model:ir.model.fields,field_description:website.field_website_page__arch
@@ -8697,7 +8569,7 @@ msgstr "Tõlkimist vajavad veebilehed"
 #: code:addons/website/static/src/xml/website.editor.xml:0
 #, python-format
 msgid "Welcome to your"
-msgstr "Teretulemast teie"
+msgstr "Tere tulemast! See on teie "
 
 #. module: website
 #. openerp-web
@@ -8894,7 +8766,7 @@ msgstr ""
 #: code:addons/website/static/src/js/content/website_root.js:0
 #, python-format
 msgid "You've published your %s."
-msgstr "Te avaldasite oma%s."
+msgstr "Te avalikustasite oma%s."
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.res_config_settings_view_form
@@ -9166,6 +9038,11 @@ msgid "https://fonts.google.com/specimen/Roboto"
 msgstr "https://fonts.google.com/specimen/Roboto"
 
 #. module: website
+#: model_terms:ir.ui.view,arch_db:website.res_config_settings_view_form
+msgid "https://www.odoo.com"
+msgstr ""
+
+#. module: website
 #: model_terms:ir.ui.view,arch_db:website.cookie_policy
 msgid ""
 "im_livechat_previous_operator_pid (Odoo)<br/>\n"
@@ -9366,11 +9243,6 @@ msgstr "hindamine, positsioon"
 #: model:ir.model.fields,field_description:website.field_res_config_settings__website_id
 msgid "website"
 msgstr "veebileht"
-
-#. module: website
-#: model_terms:ir.ui.view,arch_db:website.res_config_settings_view_form
-msgid "www.odoo.com"
-msgstr "www.odoo.com"
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.qweb_500

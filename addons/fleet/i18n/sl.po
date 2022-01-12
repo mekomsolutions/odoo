@@ -1239,7 +1239,7 @@ msgstr "Proizvajalec vozila"
 #: model:ir.actions.act_window,name:fleet.fleet_vehicle_model_brand_action
 #: model:ir.ui.menu,name:fleet.fleet_vehicle_model_brand_menu
 msgid "Manufacturers"
-msgstr ""
+msgstr "Proizvajalci"
 
 #. module: fleet
 #: model:ir.model.fields,field_description:fleet.field_fleet_vehicle__message_has_error
@@ -1901,7 +1901,7 @@ msgstr "Opravek"
 #. module: fleet
 #: model:fleet.vehicle.state,name:fleet.fleet_vehicle_state_to_order
 msgid "To Order"
-msgstr ""
+msgstr "Naročiti"
 
 #. module: fleet
 #: model_terms:ir.ui.view,arch_db:fleet.fleet_vehicle_log_contract_view_search

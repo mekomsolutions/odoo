@@ -229,12 +229,17 @@ class MassMailing(models.Model):
     @api.depends('mailing_model_id')
     def _compute_model(self):
         for record in self:
-            record.mailing_model_real = (record.mailing_model_name != 'mailing.list') and record.mailing_model_name or 'mailing.contact'
+            record.mailing_model_real = (record.mailing_model_id.model != 'mailing.list') and record.mailing_model_id.model or 'mailing.contact'
 
-    @api.depends('mailing_model_real')
+    @api.depends('mailing_model_id')
     def _compute_reply_to_mode(self):
+        """ For main models not really using chatter to gather answers (contacts
+        and mailing contacts), set reply-to as email-based. Otherwise answers
+        by default go on the original discussion thread (business document). Note
+        that mailing_model being mailing.list means contacting mailing.contact
+        (see mailing_model_name versus mailing_model_real). """
         for mailing in self:
-            if mailing.mailing_model_real in ['res.partner', 'mailing.contact']:
+            if mailing.mailing_model_id.model in ['res.partner', 'mailing.list']:
                 mailing.reply_to_mode = 'email'
             else:
                 mailing.reply_to_mode = 'thread'
@@ -247,10 +252,10 @@ class MassMailing(models.Model):
             elif mailing.reply_to_mode == 'thread':
                 mailing.reply_to = False
 
-    @api.depends('mailing_model_name', 'contact_list_ids')
+    @api.depends('mailing_model_id', 'contact_list_ids', 'mailing_type')
     def _compute_mailing_domain(self):
         for mailing in self:
-            if not mailing.mailing_model_name:
+            if not mailing.mailing_model_id:
                 mailing.mailing_domain = ''
             else:
                 mailing.mailing_domain = repr(mailing._get_default_mailing_domain())
@@ -265,7 +270,13 @@ class MassMailing(models.Model):
             values['name'] = "%s %s" % (values['subject'], datetime.strftime(fields.datetime.now(), tools.DEFAULT_SERVER_DATETIME_FORMAT))
         if values.get('body_html'):
             values['body_html'] = self._convert_inline_images_to_urls(values['body_html'])
-        return super(MassMailing, self).create(values)
+        result = super().create(values)
+
+        # fix attachment ownership
+        if result.attachment_ids:
+            result.attachment_ids.write({'res_model': self._name, 'res_id': result.id})
+
+        return result
 
     def write(self, values):
         if values.get('body_html'):
@@ -571,8 +582,11 @@ class MassMailing(models.Model):
     def action_send_mail(self, res_ids=None):
         author_id = self.env.user.partner_id.id
 
+        # If no recipient is passed, we don't want to use the recipients of the first
+        # mailing for all the others
+        initial_res_ids = res_ids
         for mailing in self:
-            if not res_ids:
+            if not initial_res_ids:
                 res_ids = mailing._get_remaining_recipients()
             if not res_ids:
                 raise UserError(_('There are no recipients selected.'))

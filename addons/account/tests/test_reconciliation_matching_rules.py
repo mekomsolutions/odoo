@@ -258,6 +258,51 @@ class TestReconciliationMatchingRules(AccountTestInvoicingCommon):
             self.bank_line_5.id: {'aml_ids': [self.invoice_line_6.id], 'model': self.rule_1, 'partner': self.bank_line_5.partner_id},
         }, statements=self.bank_st_2)
 
+    def test_matching_fields_match_text_location_no_partner(self):
+        self.bank_line_2.unlink() # One line is enough for this test
+        self.bank_line_1.partner_id = None
+
+        self.partner_1.name = "Bernard Gagnant"
+
+        self.rule_1.write({
+            'match_partner': False,
+            'match_partner_ids': [(5, 0, 0)],
+            'line_ids': [(5, 0, 0)],
+        })
+
+        st_line_initial_vals = {'ref': None, 'payment_ref': 'nothing', 'narration': None}
+        recmod_initial_vals = {'match_text_location_label': False, 'match_text_location_note': False, 'match_text_location_reference': False}
+
+        rec_mod_options_to_fields = {
+            'match_text_location_label': 'payment_ref',
+            'match_text_location_note': 'narration',
+            'match_text_location_reference': 'ref',
+        }
+
+        for rec_mod_field, st_line_field in rec_mod_options_to_fields.items():
+            self.rule_1.write({**recmod_initial_vals, rec_mod_field: True})
+            # Fully reinitialize the statement line
+            self.bank_line_1.write(st_line_initial_vals)
+
+            # Nothing should match
+            self._check_statement_matching(self.rule_1, {
+                self.bank_line_1.id: {'aml_ids': []},
+            }, statements=self.bank_st)
+
+            # Test matching with the invoice ref
+            self.bank_line_1.write({st_line_field: self.invoice_line_1.move_id.payment_reference})
+
+            self._check_statement_matching(self.rule_1, {
+                self.bank_line_1.id: {'aml_ids': self.invoice_line_1.ids, 'model': self.rule_1, 'partner': self.env['res.partner']},
+            }, statements=self.bank_st)
+
+            # Test matching with the partner name (reinitializing the statement line first)
+            self.bank_line_1.write({**st_line_initial_vals, st_line_field: self.partner_1.name})
+
+            self._check_statement_matching(self.rule_1, {
+                self.bank_line_1.id: {'aml_ids': self.invoice_line_1.ids, 'model': self.rule_1, 'partner': self.env['res.partner']},
+            }, statements=self.bank_st)
+
     def test_matching_fields_match_journal_ids(self):
         self.rule_1.match_journal_ids |= self.cash_st.journal_id
         self._check_statement_matching(self.rule_1, {
@@ -985,3 +1030,77 @@ class TestReconciliationMatchingRules(AccountTestInvoicingCommon):
         self._check_statement_matching(self.rule_1, {
             self.bank_line_1.id: {'aml_ids': (pmt_line_1 + pmt_line_2).ids, 'model': self.rule_1, 'partner': payment_partner},
         }, statements=self.bank_line_1.statement_id)
+
+    def test_tax_tags_inversion_with_reconciliation_model(self):
+        country = self.env.ref('base.us')
+        tax_report = self.env['account.tax.report'].create({
+            'name': "Tax report",
+            'country_id': country.id,
+        })
+        tax_report_line = self.env['account.tax.report.line'].create({
+            'name': 'test_tax_report_line',
+            'tag_name': 'test_tax_report_line',
+            'report_id': tax_report.id,
+            'sequence': 10,
+        })
+        tax_tag_pos = tax_report_line.tag_ids.filtered(lambda x: not x.tax_negate)
+        tax_tag_neg = tax_report_line.tag_ids.filtered(lambda x: x.tax_negate)
+        tax = self.env['account.tax'].create({
+            'name': 'Test Tax',
+            'amount': 10,
+            'invoice_repartition_line_ids': [
+                (0, 0, {
+                    'factor_percent': 100,
+                    'repartition_type': 'base',
+                    'tag_ids': [(6, 0, tax_tag_pos.ids)],
+                }),
+                (0, 0, {
+                    'factor_percent': 100,
+                    'repartition_type': 'tax',
+                    'tag_ids': [(6, 0, tax_tag_neg.ids)],
+                }),
+            ],
+            'refund_repartition_line_ids': [
+                (0, 0, {
+                    'factor_percent': 100,
+                    'repartition_type': 'base',
+                    'tag_ids': [(6, 0, tax_tag_neg.ids)],
+                }),
+                (0, 0, {
+                    'factor_percent': 100,
+                    'repartition_type': 'tax',
+                    'tag_ids': [(6, 0, tax_tag_pos.ids)],
+                }),
+            ],
+        })
+        reconciliation_model = self.env['account.reconcile.model'].create({
+            'name': 'Charge with Tax',
+            'line_ids': [(0, 0, {
+                'account_id': self.company_data['default_account_expense'].id,
+                'amount_type': 'percentage',
+                'amount_string': '100',
+                'tax_ids': [(6, 0, tax.ids)]
+            })]
+        })
+        bank_stmt = self.env['account.bank.statement'].create({
+            'journal_id': self.bank_journal.id,
+            'date': '2020-07-15',
+            'name': 'test',
+            'line_ids': [(0, 0, {
+                'payment_ref': 'testLine',
+                'amount': 5,
+                'date': '2020-07-15',
+            })]
+        })
+        res = reconciliation_model._get_write_off_move_lines_dict(bank_stmt.line_ids, 5)
+        self.assertEqual(len(res), 2)
+        self.assertEqual(
+            res[0]['tax_tag_ids'],
+            [(6, 0, tax.refund_repartition_line_ids[0].tag_ids.ids)],
+            'The tags of the first repartition line are not inverted'
+        )
+        self.assertEqual(
+            res[1]['tax_tag_ids'],
+            [(6, 0, tax.refund_repartition_line_ids[1].tag_ids.ids)],
+            'The tags of the second repartition line are not inverted'
+        )

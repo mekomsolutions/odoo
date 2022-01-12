@@ -28,14 +28,19 @@ class StockMove(models.Model):
         action_data['domain'] = [('id', 'in', self.account_move_ids.ids)]
         return action_data
 
+    def _should_force_price_unit(self):
+        self.ensure_one()
+        return False
+
     def _get_price_unit(self):
         """ Returns the unit price to value this stock move """
         self.ensure_one()
         price_unit = self.price_unit
+        precision = self.env['decimal.precision'].precision_get('Product Price')
         # If the move is a return, use the original move's price unit.
         if self.origin_returned_move_id and self.origin_returned_move_id.sudo().stock_valuation_layer_ids:
             price_unit = self.origin_returned_move_id.sudo().stock_valuation_layer_ids[-1].unit_cost
-        return not self.company_id.currency_id.is_zero(price_unit) and price_unit or self.product_id.standard_price
+        return price_unit if not float_is_zero(price_unit, precision) or self._should_force_price_unit() else self.product_id.standard_price
 
     @api.model
     def _get_valued_types(self):

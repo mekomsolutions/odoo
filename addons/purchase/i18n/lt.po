@@ -12,7 +12,6 @@
 # Antanas Muliuolis <an.muliuolis@gmail.com>, 2021
 # Edgaras Kriukonis <edgaras@focusate.eu>, 2021
 # Arunas Vaitekunas <vaitekunas@gmail.com>, 2021
-# grupoda2 <dmitrijus.ivanovas@gmail.com>, 2021
 # Martin Trigaux, 2021
 # Arminas Grigonis <arminas@versada.lt>, 2021
 # UAB "Draugiški sprendimai" <transifex@draugiskisprendimai.lt>, 2021
@@ -21,6 +20,9 @@
 # digitouch UAB <digitouchagencyeur@gmail.com>, 2021
 # Linas Versada <linaskrisiukenas@gmail.com>, 2021
 # Denis Knotko <denis_knotko@yahoo.com>, 2021
+# Jonas Zinkevicius <jozi@odoo.com>, 2021
+# grupoda2 <dmitrijus.ivanovas@gmail.com>, 2021
+# Ramunė ViaLaurea <ramune.vialaurea@gmail.com>, 2021
 # 
 msgid ""
 msgstr ""
@@ -28,7 +30,7 @@ msgstr ""
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2020-11-27 13:50+0000\n"
 "PO-Revision-Date: 2020-09-07 08:17+0000\n"
-"Last-Translator: Denis Knotko <denis_knotko@yahoo.com>, 2021\n"
+"Last-Translator: Ramunė ViaLaurea <ramune.vialaurea@gmail.com>, 2021\n"
 "Language-Team: Lithuanian (https://www.transifex.com/odoo/teams/41243/lt/)\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -469,7 +471,7 @@ msgstr "Veiklos būsena"
 #. module: purchase
 #: model:ir.model.fields,field_description:purchase.field_purchase_order__activity_type_icon
 msgid "Activity Type Icon"
-msgstr ""
+msgstr "Veiklos tipo ikona"
 
 #. module: purchase
 #: model_terms:ir.ui.view,arch_db:purchase.purchase_order_form
@@ -501,7 +503,7 @@ msgstr ""
 #. module: purchase
 #: model:res.groups,name:purchase.group_purchase_manager
 msgid "Administrator"
-msgstr ""
+msgstr "Administratorius"
 
 #. module: purchase
 #: code:addons/purchase/controllers/portal.py:0
@@ -893,7 +895,7 @@ msgstr "Sukurti sąskaitą"
 #: model_terms:ir.ui.view,arch_db:purchase.purchase_order_kpis_tree
 #: model_terms:ir.ui.view,arch_db:purchase.purchase_order_view_tree
 msgid "Create Bills"
-msgstr ""
+msgstr "Sukurti pirkimo sąskaitas"
 
 #. module: purchase
 #: model:ir.actions.server,name:purchase.action_purchase_batch_bills
@@ -1195,7 +1197,7 @@ msgstr "Piktograma"
 #. module: purchase
 #: model:ir.model.fields,help:purchase.field_purchase_order__activity_exception_icon
 msgid "Icon to indicate an exception activity."
-msgstr ""
+msgstr "Išimties veiklą žyminti piktograma."
 
 #. module: purchase
 #: model:ir.model.fields,help:purchase.field_purchase_order__message_needaction
@@ -2093,7 +2095,7 @@ msgstr ""
 #. module: purchase
 #: model:ir.model.fields,field_description:purchase.field_purchase_report__qty_billed
 msgid "Qty Billed"
-msgstr ""
+msgstr "Faktūruotas kiekis"
 
 #. module: purchase
 #: model:ir.model.fields,field_description:purchase.field_purchase_report__qty_ordered
@@ -2103,12 +2105,12 @@ msgstr "Užsakytas kiekis"
 #. module: purchase
 #: model:ir.model.fields,field_description:purchase.field_purchase_report__qty_received
 msgid "Qty Received"
-msgstr ""
+msgstr "Gautas kiekis"
 
 #. module: purchase
 #: model:ir.model.fields,field_description:purchase.field_purchase_report__qty_to_be_billed
 msgid "Qty to be Billed"
-msgstr ""
+msgstr "Nefaktūr. kiekis"
 
 #. module: purchase
 #: model_terms:ir.ui.view,arch_db:purchase.res_config_settings_view_form_purchase
@@ -2709,7 +2711,7 @@ msgstr ""
 #. module: purchase
 #: model:ir.model.fields,help:purchase.field_purchase_order__activity_exception_decoration
 msgid "Type of the exception activity on record."
-msgstr ""
+msgstr "Įrašytos išimties veiklos tipas."
 
 #. module: purchase
 #: code:addons/purchase/models/purchase.py:0
@@ -2808,7 +2810,7 @@ msgstr "Pagalbinis laukas, išreiškiantis sumą valiuta"
 #. module: purchase
 #: model_terms:ir.ui.view,arch_db:purchase.res_config_settings_view_form_purchase
 msgid "Variant Grid Entry"
-msgstr ""
+msgstr "Variantų tinklelio įvestis"
 
 #. module: purchase
 #: model:ir.model.fields,field_description:purchase.field_purchase_bill_union__partner_id
@@ -2993,6 +2995,8 @@ msgid ""
 "Your quotation contains products from company %(product_company)s whereas your quotation belongs to company %(quote_company)s. \n"
 " Please change the company of your quotation or remove the products from other companies (%(bad_products)s)."
 msgstr ""
+"Jūsų komerciniame pasiūlyme yra produktų iš įmonės %(product_company)s, o jūsų pasiūlymas priklauso %(quote_company)s įmonei . \n"
+"Prašome pakeisti įmonę savo komerciniame pasiūlyme arba pašalinkite kitų įmonių produktus (%(bad_products)s)."
 
 #. module: purchase
 #: model_terms:ir.ui.view,arch_db:purchase.purchase_order_form

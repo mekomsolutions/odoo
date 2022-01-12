@@ -400,7 +400,7 @@ class SaleOrder(models.Model):
         }
         user_id = partner_user.id
         if not self.env.context.get('not_self_saleperson'):
-            user_id = user_id or self.env.uid
+            user_id = user_id or self.env.context.get('default_user_id', self.env.uid)
         if user_id and self.user_id.id != user_id:
             values['user_id'] = user_id
 
@@ -482,7 +482,8 @@ class SaleOrder(models.Model):
             price_unit = self.env['account.tax']._fix_tax_included_price_company(
                 line._get_display_price(product), line.product_id.taxes_id, line.tax_id, line.company_id)
             if self.pricelist_id.discount_policy == 'without_discount' and price_unit:
-                discount = max(0, (price_unit - product.price) * 100 / price_unit)
+                price_discount_unrounded = self.pricelist_id.get_product_price(product, line.product_uom_qty, self.partner_id, self.date_order, line.product_uom.id)
+                discount = max(0, (price_unit - price_discount_unrounded) * 100 / price_unit)
             else:
                 discount = 0
             lines_to_update.append((1, line.id, {'price_unit': price_unit, 'discount': discount}))
@@ -511,11 +512,13 @@ class SaleOrder(models.Model):
         return result
 
     def _compute_field_value(self, field):
+        if field.name == 'invoice_status' and not self.env.context.get('mail_activity_automation_skip'):
+            filtered_self = self.filtered(lambda so: so.user_id and so._origin.invoice_status != 'upselling')
         super()._compute_field_value(field)
         if field.name != 'invoice_status' or self.env.context.get('mail_activity_automation_skip'):
             return
 
-        filtered_self = self.filtered(lambda so: so.user_id and so.invoice_status == 'upselling')
+        filtered_self = filtered_self.filtered(lambda so: so.invoice_status == 'upselling')
         if not filtered_self:
             return
 
@@ -578,7 +581,8 @@ class SaleOrder(models.Model):
             'campaign_id': self.campaign_id.id,
             'medium_id': self.medium_id.id,
             'source_id': self.source_id.id,
-            'invoice_user_id': self.user_id and self.user_id.id,
+            'user_id': self.user_id.id,
+            'invoice_user_id': self.user_id.id,
             'team_id': self.team_id.id,
             'partner_id': self.partner_invoice_id.id,
             'partner_shipping_id': self.partner_shipping_id.id,
@@ -624,7 +628,7 @@ class SaleOrder(models.Model):
                 'default_partner_id': self.partner_id.id,
                 'default_partner_shipping_id': self.partner_shipping_id.id,
                 'default_invoice_payment_term_id': self.payment_term_id.id or self.partner_id.property_payment_term_id.id or self.env['account.move'].default_get(['invoice_payment_term_id']).get('invoice_payment_term_id'),
-                'default_invoice_origin': self.mapped('name'),
+                'default_invoice_origin': self.name,
                 'default_user_id': self.user_id.id,
             })
         action['context'] = context
@@ -696,7 +700,7 @@ Reason(s) of this behavior could be:
             invoiceable_lines = order._get_invoiceable_lines(final)
 
             if not any(not line.display_type for line in invoiceable_lines):
-                raise self._nothing_to_invoice_error()
+                continue
 
             invoice_line_vals = []
             down_payment_section_added = False
@@ -709,7 +713,7 @@ Reason(s) of this behavior could be:
                             sequence=invoice_item_sequence,
                         )),
                     )
-                    dp_section = True
+                    down_payment_section_added = True
                     invoice_item_sequence += 1
                 invoice_line_vals.append(
                     (0, 0, line._prepare_invoice_line(
@@ -728,6 +732,7 @@ Reason(s) of this behavior could be:
         if not grouped:
             new_invoice_vals_list = []
             invoice_grouping_keys = self._get_invoice_grouping_keys()
+            invoice_vals_list = sorted(invoice_vals_list, key=lambda x: [x.get(grouping_key) for grouping_key in invoice_grouping_keys])
             for grouping_keys, invoices in groupby(invoice_vals_list, key=lambda x: [x.get(grouping_key) for grouping_key in invoice_grouping_keys]):
                 origins = set()
                 payment_refs = set()
@@ -814,6 +819,9 @@ Reason(s) of this behavior could be:
                 'context': {'default_order_id': self.id},
                 'target': 'new'
             }
+        return self._action_cancel()
+
+    def _action_cancel(self):
         inv = self.invoice_ids.filtered(lambda inv: inv.state == 'draft')
         inv.button_cancel()
         return self.write({'state': 'cancel'})
@@ -1039,11 +1047,11 @@ Reason(s) of this behavior could be:
                 if payment_token and payment_token.acquirer_id != acquirer:
                     raise ValidationError(_('Invalid token found! Token acquirer %s != %s') % (
                     payment_token.acquirer_id.name, acquirer.name))
-                if payment_token and payment_token.partner_id != partner:
-                    raise ValidationError(_('Invalid token found! Token partner %s != %s') % (
-                    payment_token.partner.name, partner.name))
             else:
                 acquirer = payment_token.acquirer_id
+
+            if payment_token and payment_token.partner_id != partner:
+                raise ValidationError(_('Invalid token found!'))
 
         # Check an acquirer is there.
         if not acquirer_id and not acquirer:
@@ -1224,7 +1232,7 @@ class SaleOrderLine(models.Model):
             else:
                 line.qty_to_invoice = 0
 
-    @api.depends('invoice_lines.move_id.state', 'invoice_lines.quantity', 'untaxed_amount_to_invoice')
+    @api.depends('invoice_lines.move_id.state', 'invoice_lines.quantity')
     def _get_invoice_qty(self):
         """
         Compute the quantity invoiced. If case of a refund, the quantity invoiced is decreased. Note
@@ -1239,8 +1247,7 @@ class SaleOrderLine(models.Model):
                     if invoice_line.move_id.move_type == 'out_invoice':
                         qty_invoiced += invoice_line.product_uom_id._compute_quantity(invoice_line.quantity, line.product_uom)
                     elif invoice_line.move_id.move_type == 'out_refund':
-                        if not line.is_downpayment or line.untaxed_amount_to_invoice == 0 :
-                            qty_invoiced -= invoice_line.product_uom_id._compute_quantity(invoice_line.quantity, line.product_uom)
+                        qty_invoiced -= invoice_line.product_uom_id._compute_quantity(invoice_line.quantity, line.product_uom)
             line.qty_invoiced = qty_invoiced
 
     @api.depends('price_unit', 'discount')
@@ -1563,16 +1570,17 @@ class SaleOrderLine(models.Model):
                 # amount and not zero. Since we compute untaxed amount, we can use directly the price
                 # reduce (to include discount) without using `compute_all()` method on taxes.
                 price_subtotal = 0.0
-                umo_qty_to_consider = line.qty_delivered if line.product_id.invoice_policy == 'delivery' else line.product_uom_qty
-                price_subtotal = line.price_reduce * umo_qty_to_consider
+                uom_qty_to_consider = line.qty_delivered if line.product_id.invoice_policy == 'delivery' else line.product_uom_qty
+                price_reduce = line.price_unit * (1 - (line.discount or 0.0) / 100.0)
+                price_subtotal = price_reduce * uom_qty_to_consider
                 if len(line.tax_id.filtered(lambda tax: tax.price_include)) > 0:
                     # As included taxes are not excluded from the computed subtotal, `compute_all()` method
                     # has to be called to retrieve the subtotal without them.
                     # `price_reduce_taxexcl` cannot be used as it is computed from `price_subtotal` field. (see upper Note)
                     price_subtotal = line.tax_id.compute_all(
-                        line.price_reduce,
+                        price_reduce,
                         currency=line.order_id.currency_id,
-                        quantity=umo_qty_to_consider,
+                        quantity=uom_qty_to_consider,
                         product=line.product_id,
                         partner=line.order_id.partner_shipping_id)['total_excluded']
 

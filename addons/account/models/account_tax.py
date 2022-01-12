@@ -183,7 +183,9 @@ class AccountTax(models.Model):
 
     @api.returns('self', lambda value: value.id)
     def copy(self, default=None):
-        default = dict(default or {}, name=_("%s (Copy)", self.name))
+        default = dict(default or {})
+        if 'name' not in default:
+            default['name'] = _("%s (Copy)") % self.name
         return super(AccountTax, self).copy(default=default)
 
     def name_get(self):
@@ -484,7 +486,7 @@ class AccountTax(models.Model):
                     elif tax.amount_type == 'division':
                         incl_division_amount += tax.amount * sum_repartition_factor
                     elif tax.amount_type == 'fixed':
-                        incl_fixed_amount += quantity * tax.amount * sum_repartition_factor
+                        incl_fixed_amount += abs(quantity) * tax.amount * sum_repartition_factor
                     else:
                         # tax.amount_type == other (python)
                         tax_amount = tax._compute_amount(base, sign * price_unit, quantity, product, partner) * sum_repartition_factor
@@ -522,7 +524,7 @@ class AccountTax(models.Model):
             price_include = self._context.get('force_price_include', tax.price_include)
 
             #compute the tax_amount
-            if not skip_checkpoint and price_include and total_included_checkpoints.get(i):
+            if not skip_checkpoint and price_include and total_included_checkpoints.get(i) and sum_repartition_factor != 0:
                 # We know the total to reach for that tax, so we make a substraction to avoid any rounding issues
                 tax_amount = total_included_checkpoints[i] - (base + cumulated_tax_included_amount)
                 cumulated_tax_included_amount = 0

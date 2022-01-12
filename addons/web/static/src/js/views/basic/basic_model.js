@@ -381,6 +381,11 @@ var BasicModel = AbstractModel.extend({
                     if (parent && parent.type === 'list') {
                         parent.data = _.without(parent.data, record.id);
                         delete self.localData[record.id];
+                        // Check if we are on last page and all records are deleted from current
+                        // page i.e. if there is no state.data.length then go to previous page
+                        if (!parent.data.length && parent.offset > 0) {
+                            parent.offset = Math.max(parent.offset - parent.limit, 0);
+                        }
                     } else {
                         record.res_ids.splice(record.offset, 1);
                         record.offset = Math.min(record.offset, record.res_ids.length - 1);
@@ -1009,6 +1014,7 @@ var BasicModel = AbstractModel.extend({
         var params = {
             model: modelName,
             ids: resIDs,
+            context: data.getContext(),
         };
         if (options.offset) {
             params.offset = options.offset;
@@ -1032,6 +1038,7 @@ var BasicModel = AbstractModel.extend({
                     model: modelName,
                     method: 'read',
                     args: [resIDs, [field]],
+                    context: data.getContext(),
                 }).then(function (records) {
                     if (data.data.length) {
                         var dataType = self.localData[data.data[0]].type;
@@ -1302,14 +1309,27 @@ var BasicModel = AbstractModel.extend({
                 // optionally clear the DataManager's cache
                 self._invalidateCache(parent);
                 if (!_.isEmpty(action)) {
-                    return self.do_action(action, {
-                        on_close: function () {
-                            return self.trigger_up('reload');
-                        }
+                    return new Promise(function (resolve, reject) {
+                        self.do_action(action, {
+                            on_close: function (result) {
+                                return self.trigger_up('reload', {
+                                    onSuccess: resolve,
+                                });
+                            }
+                        });
                     });
                 } else {
                     return self.reload(parentID);
                 }
+            }).then(function (datapoint) {
+                // if there are no records to display and we are not on first page(we check it
+                // by checking offset is greater than limit i.e. we are not on first page)
+                // reason for adding logic after reload to make sure there is no records after operation
+                if (parent && parent.type === 'list' && !parent.data.length && parent.offset > 0) {
+                    parent.offset = Math.max(parent.offset - parent.limit, 0);
+                    return self.reload(parentID);
+                }
+                return datapoint;
             });
     },
     /**
@@ -1331,14 +1351,27 @@ var BasicModel = AbstractModel.extend({
                 // optionally clear the DataManager's cache
                 self._invalidateCache(parent);
                 if (!_.isEmpty(action)) {
-                    return self.do_action(action, {
-                        on_close: function () {
-                            return self.trigger_up('reload');
-                        }
+                    return new Promise(function (resolve, reject) {
+                        self.do_action(action, {
+                            on_close: function () {
+                                return self.trigger_up('reload', {
+                                    onSuccess: resolve,
+                                });
+                            }
+                        });
                     });
                 } else {
                     return self.reload(parentID);
                 }
+            }).then(function (datapoint) {
+                // if there are no records to display and we are not on first page(we check it
+                // by checking offset is greater than limit i.e. we are not on first page)
+                // reason for adding logic after reload to make sure there is no records after operation
+                if (parent && parent.type === 'list' && !parent.data.length && parent.offset > 0) {
+                    parent.offset = Math.max(parent.offset - parent.limit, 0);
+                    return self.reload(parentID);
+                }
+                return datapoint;
             });
     },
     /**
@@ -5092,6 +5125,7 @@ var BasicModel = AbstractModel.extend({
         var fieldsInfo = view ? view.fieldsInfo : fieldInfo.fieldsInfo;
         var fields = view ? view.fields : fieldInfo.relatedFields;
         var viewType = view ? view.type : fieldInfo.viewType;
+        var id2Values = new Map(values.map((value) => [value.id, value]))
 
         _.each(records, function (record) {
             var x2mList = self.localData[record.data[fieldName]];
@@ -5099,7 +5133,7 @@ var BasicModel = AbstractModel.extend({
             _.each(x2mList.res_ids, function (res_id) {
                 var dataPoint = self._makeDataPoint({
                     modelName: field.relation,
-                    data: _.findWhere(values, {id: res_id}),
+                    data: id2Values.get(res_id),
                     fields: fields,
                     fieldsInfo: fieldsInfo,
                     parentID: x2mList.id,

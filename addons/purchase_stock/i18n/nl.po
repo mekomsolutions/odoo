@@ -289,6 +289,18 @@ msgid "Exception(s):"
 msgstr "Foutmelding(en):"
 
 #. module: purchase_stock
+#: code:addons/purchase_stock/models/purchase.py:0
+#, python-format
+msgid ""
+"For the product %s, the warehouse of the operation type (%s) is inconsistent"
+" with the location (%s) of the reordering rule (%s). Change the operation "
+"type or cancel the request for quotation."
+msgstr ""
+"Voor het product %s is het magazijn van het bewerkingstype (%s) niet "
+"consistent met de locatie (%s) van de aanvulregel (%s). Wijzig het type "
+"bewerking of annuleer de offerteaanvraag."
+
+#. module: purchase_stock
 #. openerp-web
 #: code:addons/purchase_stock/static/src/js/tours/purchase_stock.js:0
 #, python-format
@@ -637,13 +649,13 @@ msgstr "Geef leverancierkolom wer"
 #. module: purchase_stock
 #: model:ir.model,name:purchase_stock.model_stock_move
 msgid "Stock Move"
-msgstr "Voorraadverplaatsting"
+msgstr "Voorraadverplaatsing"
 
 #. module: purchase_stock
 #: model:ir.model.fields.selection,name:purchase_stock.selection__purchase_order_line__qty_received_method__stock_moves
 #: model_terms:ir.ui.view,arch_db:purchase_stock.purchase_order_line_view_form_inherit
 msgid "Stock Moves"
-msgstr "Voorraadverplaatstingen"
+msgstr "Voorraadverplaatsingen"
 
 #. module: purchase_stock
 #: model:ir.model,name:purchase_stock.model_report_stock_report_product_product_replenishment

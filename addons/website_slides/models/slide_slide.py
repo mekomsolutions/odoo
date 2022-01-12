@@ -15,7 +15,7 @@ from werkzeug import urls
 
 from odoo import api, fields, models, _
 from odoo.addons.http_routing.models.ir_http import slug
-from odoo.exceptions import Warning, UserError, AccessError
+from odoo.exceptions import UserError, AccessError
 from odoo.http import request
 from odoo.addons.http_routing.models.ir_http import url_for
 from odoo.tools import sql
@@ -173,7 +173,7 @@ class Slide(models.Model):
     slide_resource_ids = fields.One2many('slide.slide.resource', 'slide_id', string="Additional Resource for this slide")
     slide_resource_downloadable = fields.Boolean('Allow Download', default=True, help="Allow the user to download the content of the slide.")
     mime_type = fields.Char('Mime-type')
-    html_content = fields.Html("HTML Content", help="Custom HTML content for slides of type 'Web Page'.", translate=True, sanitize_form=False)
+    html_content = fields.Html("HTML Content", help="Custom HTML content for slides of type 'Web Page'.", translate=True, sanitize_attributes=False, sanitize_form=False)
     # website
     website_id = fields.Many2one(related='channel_id.website_id', readonly=True)
     date_published = fields.Datetime('Publish Date', readonly=True, tracking=1)
@@ -358,10 +358,10 @@ class Slide(models.Model):
         if self.url:
             res = self._parse_document_url(self.url)
             if res.get('error'):
-                raise Warning(res.get('error'))
+                raise UserError(res.get('error'))
             values = res['values']
             if not values.get('document_id'):
-                raise Warning(_('Please enter valid Youtube or Google Doc URL'))
+                raise UserError(_('Please enter valid Youtube or Google Doc URL'))
             for key, value in values.items():
                 self[key] = value
 
@@ -376,6 +376,10 @@ class Slide(models.Model):
             data = base64.b64decode(self.datas)
             if data.startswith(b'%PDF-'):
                 pdf = PyPDF2.PdfFileReader(io.BytesIO(data), overwriteWarnings=False, strict=False)
+                try:
+                    pdf.getNumPages()
+                except PyPDF2.utils.PdfReadError:
+                    return
                 self.completion_time = (5 * len(pdf.pages)) / 60
             else:
                 self.slide_type = 'infographic'

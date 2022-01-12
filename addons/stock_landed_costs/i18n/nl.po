@@ -679,7 +679,7 @@ msgstr "Logistieke kostenregel"
 #. module: stock_landed_costs
 #: model:ir.model.fields,field_description:stock_landed_costs.field_stock_valuation_adjustment_lines__move_id
 msgid "Stock Move"
-msgstr "Voorraadverplaatsting"
+msgstr "Voorraadverplaatsing"
 
 #. module: stock_landed_costs
 #: model:ir.model,name:stock_landed_costs.model_stock_valuation_layer
@@ -779,12 +779,11 @@ msgstr "Gewicht"
 #, python-format
 msgid ""
 "You cannot apply landed costs on the chosen %s(s). Landed costs can only be "
-"applied for products with automated inventory valuation and FIFO or average "
-"costing method."
+"applied for products with FIFO or average costing method."
 msgstr ""
-"U kunt geen logistieke kosten toepassen op de gekozen %s(en). Logistieke "
-"kosten kunnen alleen worden toegepast voor producten met geautomatiseerde "
-"voorraadwaardering en FIFO of gemiddelde kostprijsberekeningsmethode."
+"U kunt geen logistieke kosten toepassen op de gekozen %s). Logistieke kosten"
+" kunnen alleen worden toegepast voor producten met FIFO- of Gemiddelde "
+"kostprijs (AVCO) kostprijsbepaling."
 
 #. module: stock_landed_costs
 #: code:addons/stock_landed_costs/models/product.py:0

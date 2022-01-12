@@ -141,7 +141,8 @@ class AccountMoveLine(models.Model):
         # create the sale lines in batch
         new_sale_lines = self.env['sale.order.line'].create(sale_line_values_to_create)
         for sol in new_sale_lines:
-            sol._onchange_discount()
+            if sol.product_id.expense_policy != 'cost':
+                sol._onchange_discount()
 
         # build result map by replacing index with newly created record of sale.order.line
         result = {}
@@ -207,7 +208,7 @@ class AccountMoveLine(models.Model):
 
         if self.product_id.expense_policy == 'sales_price':
             product = self.product_id.with_context(
-                partner=order.partner_id.id,
+                partner=order.partner_id,
                 date_order=order.date_order,
                 pricelist=order.pricelist_id.id,
                 uom=self.product_uom_id.id,

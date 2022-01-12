@@ -648,8 +648,7 @@ class Channel(models.Model):
                 # avoid sending potentially a lot of members for big channels
                 # exclude chat and other small channels from this optimization because they are
                 # assumed to be smaller and it's important to know the member list for them
-                partner_ids = channel_partners.mapped('partner_id').ids
-                info['members'] = [partner_infos[partner] for partner in partner_ids]
+                info['members'] = [channel._channel_info_format_member(partner, partner_infos[partner.id]) for partner in channel_partners.partner_id.sudo().with_prefetch(all_partners.ids)]
             if channel.channel_type != 'channel':
                 info['seen_partners_info'] = [{
                     'id': cp.id,
@@ -660,6 +659,11 @@ class Channel(models.Model):
 
             channel_infos.append(info)
         return channel_infos
+
+    def _channel_info_format_member(self, partner, partner_info):
+        """Returns member information in the context of self channel."""
+        self.ensure_one()
+        return partner_info
 
     def channel_fetch_message(self, last_id=False, limit=20):
         """ Return message values of the current channel.
@@ -712,7 +716,7 @@ class Channel(models.Model):
             channel = self.browse(result[0].get('channel_id'))
             # pin up the channel for the current partner
             if pin:
-                self.env['mail.channel.partner'].search([('partner_id', '=', self.env.user.partner_id.id), ('channel_id', '=', channel.id)]).write({'is_pinned': True})
+                self.env['mail.channel.partner'].search([('partner_id', '=', self.env.user.partner_id.id), ('channel_id', '=', channel.id), ('is_pinned', '=', False)]).write({'is_pinned': True})
             channel._broadcast(self.env.user.partner_id.ids)
         else:
             # create a new one
@@ -748,10 +752,14 @@ class Channel(models.Model):
                     state = 'folded'
                 else:
                     state = 'open'
-            session_state.write({
-                'fold_state': state,
-                'is_minimized': bool(state != 'closed'),
-            })
+            is_minimized = bool(state != 'closed')
+            vals = {}
+            if session_state.fold_state != state:
+                vals['fold_state'] = state
+            if session_state.is_minimized != is_minimized:
+                vals['is_minimized'] = is_minimized
+            if vals:
+                session_state.write(vals)
             self.env['bus.bus'].sendone((self._cr.dbname, 'res.partner', self.env.user.partner_id.id), session_state.channel_id.channel_info()[0])
 
     @api.model
@@ -923,15 +931,21 @@ class Channel(models.Model):
         """
         notifications = []
         for channel in self:
-            data = {
+            data = dict({
                 'info': 'typing_status',
                 'is_typing': is_typing,
-                'partner_id': self.env.user.partner_id.id,
-                'partner_name': self.env.user.partner_id.name,
-            }
+            }, **channel._notify_typing_partner_data())
             notifications.append([(self._cr.dbname, 'mail.channel', channel.id), data]) # notify backend users
             notifications.append([channel.uuid, data]) # notify frontend users
         self.env['bus.bus'].sendmany(notifications)
+
+    def _notify_typing_partner_data(self):
+        """Returns typing partner data for self channel."""
+        self.ensure_one()
+        return {
+            'partner_id': self.env.user.partner_id.id,
+            'partner_name': self.env.user.partner_id.name,
+        }
 
     #------------------------------------------------------
     # Instant Messaging View Specific (Slack Client Action)

@@ -216,7 +216,7 @@ msgstr "Creato da"
 #: model:ir.model.fields,field_description:stock_landed_costs.field_stock_landed_cost_lines__create_date
 #: model:ir.model.fields,field_description:stock_landed_costs.field_stock_valuation_adjustment_lines__create_date
 msgid "Created on"
-msgstr "Creato il"
+msgstr "Data creazione"
 
 #. module: stock_landed_costs
 #: model:ir.model.fields,field_description:stock_landed_costs.field_stock_landed_cost__currency_id
@@ -778,8 +778,7 @@ msgstr "Peso"
 #, python-format
 msgid ""
 "You cannot apply landed costs on the chosen %s(s). Landed costs can only be "
-"applied for products with automated inventory valuation and FIFO or average "
-"costing method."
+"applied for products with FIFO or average costing method."
 msgstr ""
 
 #. module: stock_landed_costs

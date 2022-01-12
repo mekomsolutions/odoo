@@ -286,6 +286,7 @@ class AccountJournal(models.Model):
             WHERE aml.journal_id in (%s)
             AND EXISTS (SELECT 1 FROM journal_account_control_rel rel WHERE rel.journal_id = aml.journal_id)
             AND NOT EXISTS (SELECT 1 FROM journal_account_control_rel rel WHERE rel.account_id = aml.account_id AND rel.journal_id = aml.journal_id)
+            AND aml.display_type IS NULL
         """, tuple(self.ids))
         if self._cr.fetchone():
             raise ValidationError(_('Some journal items already exist in this journal but with other accounts than the allowed ones.'))
@@ -322,6 +323,22 @@ class AccountJournal(models.Model):
         for journal in self:
             if journal.type in ('sale', 'purchase') and journal.default_account_id.user_type_id.type in ('receivable', 'payable'):
                 raise ValidationError(_("The type of the journal's default credit/debit account shouldn't be 'receivable' or 'payable'."))
+
+    @api.constrains('active')
+    def _check_auto_post_draft_entries(self):
+        # constraint should be tested just after archiving a journal, but shouldn't be raised when unarchiving a journal containing draft entries
+        for journal in self.filtered(lambda j: not j.active):
+            pending_moves = self.env['account.move'].search([
+                ('journal_id', '=', journal.id),
+                ('state', '=', 'draft')
+            ], limit=1)
+
+            if pending_moves:
+                raise ValidationError(_("You can not archive a journal containing draft journal entries.\n\n"
+                                        "To proceed:\n"
+                                        "1/ click on the top-right button 'Journal Entries' from this journal form\n"
+                                        "2/ then filter on 'Draft' entries\n"
+                                        "3/ select them all and post or delete them through the action menu"))
 
     @api.onchange('type')
     def _onchange_type(self):
@@ -672,7 +689,7 @@ class AccountJournal(models.Model):
         domain = (domain or []) + [
             ('account_id', 'in', tuple(self.default_account_id.ids)),
             ('display_type', 'not in', ('line_section', 'line_note')),
-            ('move_id.state', '!=', 'cancel'),
+            ('parent_state', '!=', 'cancel'),
         ]
         query = self.env['account.move.line']._where_calc(domain)
         tables, where_clause, where_params = query.get_sql()
@@ -717,7 +734,7 @@ class AccountJournal(models.Model):
         domain = (domain or []) + [
             ('account_id', 'in', tuple(accounts.ids)),
             ('display_type', 'not in', ('line_section', 'line_note')),
-            ('move_id.state', '!=', 'cancel'),
+            ('parent_state', '!=', 'cancel'),
             ('reconciled', '=', False),
             ('journal_id', '=', self.id),
         ]

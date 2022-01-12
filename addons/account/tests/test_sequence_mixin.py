@@ -7,6 +7,7 @@ from odoo.exceptions import ValidationError
 from odoo.tools import mute_logger
 
 from dateutil.relativedelta import relativedelta
+from freezegun import freeze_time
 from functools import reduce
 import json
 import psycopg2
@@ -79,12 +80,22 @@ class TestSequenceMixin(AccountTestInvoicingCommon):
         copy2.journal_id = new_journal
         self.assertEqual(copy2.name, 'MISC2/2016/01/0001')
         with Form(copy2) as move_form:  # It is editable in the form
-            move_form.name = 'MyMISC/2016/0001'
+            with mute_logger('odoo.tests.common.onchange'):
+                move_form.name = 'MyMISC/2016/0001'
+                self.assertIn(
+                    'The sequence will restart at 1 at the start of every year',
+                    move_form._perform_onchange(['name'])['warning']['message'],
+                )
             move_form.journal_id = self.test_move.journal_id
             self.assertEqual(move_form.name, '/')
             move_form.journal_id = new_journal
             self.assertEqual(move_form.name, 'MISC2/2016/01/0001')
-            move_form.name = 'MyMISC/2016/0001'
+            with mute_logger('odoo.tests.common.onchange'):
+                move_form.name = 'MyMISC/2016/0001'
+                self.assertIn(
+                    'The sequence will restart at 1 at the start of every year',
+                    move_form._perform_onchange(['name'])['warning']['message'],
+                )
         copy2.action_post()
         self.assertEqual(copy2.name, 'MyMISC/2016/0001')
 
@@ -384,3 +395,16 @@ class TestSequenceMixin(AccountTestInvoicingCommon):
             journal.unlink()
             account.unlink()
             env0.cr.commit()
+
+    @freeze_time('2021-10-01 00:00:00')
+    def test_change_journal_on_first_account_move(self):
+        """Changing the journal on the first move is allowed"""
+        journal = self.env['account.journal'].create({
+            'name': 'awesome journal',
+            'type': 'general',
+            'code': 'AJ',
+        })
+        move = self.env['account.move'].create({})
+        self.assertEqual(move.name, 'MISC/2021/10/0001')
+        with Form(move) as move_form:
+            move_form.journal_id = journal

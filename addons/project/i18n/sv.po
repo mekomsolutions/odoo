@@ -14,9 +14,13 @@
 # Martin Wilderoth <martin.wilderoth@linserv.se>, 2021
 # Stephen Schmidt <stephen.schmidt@linserv.se>, 2021
 # Robert Frykelius <robert.frykelius@linserv.se>, 2021
-# Kim Asplund <kim.asplund@gmail.com>, 2021
-# Chrille Hedberg <hedberg.chrille@gmail.com>, 2021
+# Jakob Krabbe <jakob.krabbe@vertel.se>, 2021
+# STefan Rundgren <stefanrundgren@cellglas.com>, 2021
 # Anders Wallenquist <anders.wallenquist@vertel.se>, 2021
+# Kim Asplund <kim.asplund@gmail.com>, 2021
+# Victor Ekström, 2021
+# Simon S, 2021
+# Chrille Hedberg <hedberg.chrille@gmail.com>, 2021
 # 
 msgid ""
 msgstr ""
@@ -24,7 +28,7 @@ msgstr ""
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2020-11-27 11:23+0000\n"
 "PO-Revision-Date: 2020-09-07 08:17+0000\n"
-"Last-Translator: Anders Wallenquist <anders.wallenquist@vertel.se>, 2021\n"
+"Last-Translator: Chrille Hedberg <hedberg.chrille@gmail.com>, 2021\n"
 "Language-Team: Swedish (https://www.transifex.com/odoo/teams/41243/sv/)\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -109,13 +113,13 @@ msgstr ""
 #: model:ir.model.fields.selection,name:project.selection__project_task__repeat_day__10
 #: model:ir.model.fields.selection,name:project.selection__project_task_recurrence__repeat_day__10
 msgid "10"
-msgstr ""
+msgstr "10"
 
 #. module: project
 #: model:ir.model.fields.selection,name:project.selection__project_task__repeat_day__11
 #: model:ir.model.fields.selection,name:project.selection__project_task_recurrence__repeat_day__11
 msgid "11"
-msgstr ""
+msgstr "11"
 
 #. module: project
 #: model:ir.model.fields.selection,name:project.selection__project_task__repeat_day__12
@@ -127,25 +131,25 @@ msgstr "12"
 #: model:ir.model.fields.selection,name:project.selection__project_task__repeat_day__13
 #: model:ir.model.fields.selection,name:project.selection__project_task_recurrence__repeat_day__13
 msgid "13"
-msgstr ""
+msgstr "13"
 
 #. module: project
 #: model:ir.model.fields.selection,name:project.selection__project_task__repeat_day__14
 #: model:ir.model.fields.selection,name:project.selection__project_task_recurrence__repeat_day__14
 msgid "14"
-msgstr ""
+msgstr "14"
 
 #. module: project
 #: model:ir.model.fields.selection,name:project.selection__project_task__repeat_day__15
 #: model:ir.model.fields.selection,name:project.selection__project_task_recurrence__repeat_day__15
 msgid "15"
-msgstr ""
+msgstr "15"
 
 #. module: project
 #: model:ir.model.fields.selection,name:project.selection__project_task__repeat_day__16
 #: model:ir.model.fields.selection,name:project.selection__project_task_recurrence__repeat_day__16
 msgid "16"
-msgstr ""
+msgstr "16"
 
 #. module: project
 #: model:ir.model.fields.selection,name:project.selection__project_task__repeat_day__17
@@ -199,7 +203,7 @@ msgstr ""
 #: model:ir.model.fields.selection,name:project.selection__project_task__repeat_day__25
 #: model:ir.model.fields.selection,name:project.selection__project_task_recurrence__repeat_day__25
 msgid "25"
-msgstr ""
+msgstr "25"
 
 #. module: project
 #: model:ir.model.fields.selection,name:project.selection__project_task__repeat_day__26
@@ -366,7 +370,7 @@ msgstr ""
 #: code:addons/project/models/project.py:0
 #, python-format
 msgid "<p><em>Number of tasks: %(tasks_count)s</em></p>"
-msgstr ""
+msgstr "<p><em>Antal aktiviteter: %(tasks_count)s</em></p>"
 
 #. module: project
 #: model_terms:ir.ui.view,arch_db:project.portal_my_task
@@ -388,7 +392,7 @@ msgstr ""
 #. module: project
 #: model_terms:ir.ui.view,arch_db:project.portal_my_project
 msgid "<span class=\"fa fa-tasks\" role=\"img\" aria-label=\"Tasks\" title=\"Tasks\"/>"
-msgstr ""
+msgstr "<span class=\"fa fa-tasks\" role=\"img\" aria-label=\"Tasks\" title=\"Tasks\"/>"
 
 #. module: project
 #: model_terms:ir.ui.view,arch_db:project.edit_project
@@ -400,7 +404,7 @@ msgstr ""
 #. module: project
 #: model_terms:ir.ui.view,arch_db:project.view_project_kanban
 msgid "<span class=\"o_label\">Profitability</span>"
-msgstr ""
+msgstr "<span class=\"o_label\">Lönsamhet</span>"
 
 #. module: project
 #: model_terms:ir.ui.view,arch_db:project.edit_project
@@ -485,7 +489,7 @@ msgstr "Ta emot e-post från"
 #: model:ir.model.fields,field_description:project.field_project_project__access_warning
 #: model:ir.model.fields,field_description:project.field_project_task__access_warning
 msgid "Access warning"
-msgstr ""
+msgstr "Åtkomstvarning"
 
 #. module: project
 #: model:ir.model.fields,field_description:project.field_project_project__message_needaction
@@ -508,17 +512,17 @@ msgstr "Aktiviteter"
 #. module: project
 #: model:ir.model.fields,field_description:project.field_project_task__activity_exception_decoration
 msgid "Activity Exception Decoration"
-msgstr ""
+msgstr "Dekoration för aktivitetsundantag"
 
 #. module: project
 #: model:ir.model.fields,field_description:project.field_project_task__activity_state
 msgid "Activity State"
-msgstr ""
+msgstr "Aktivitetsstatus"
 
 #. module: project
 #: model:ir.model.fields,field_description:project.field_project_task__activity_type_icon
 msgid "Activity Type Icon"
-msgstr ""
+msgstr "Aktivitetstypsikon"
 
 #. module: project
 #: model:ir.actions.act_window,name:project.mail_activity_type_action_config_project_types
@@ -594,27 +598,27 @@ msgstr "Alla"
 #. module: project
 #: model:ir.model.fields.selection,name:project.selection__project_project__privacy_visibility__employees
 msgid "All internal users"
-msgstr ""
+msgstr "Alla interna användare"
 
 #. module: project
 #: model:ir.model.fields.selection,name:project.selection__project_task__recurrence_update__all
 msgid "All tasks"
-msgstr ""
+msgstr "Alla aktiviteter"
 
 #. module: project
 #: model:ir.model.fields,field_description:project.field_project_task__allow_subtasks
 msgid "Allow Sub-tasks"
-msgstr ""
+msgstr "Tillåt underaktiviteter"
 
 #. module: project
 #: model:ir.model.fields,field_description:project.field_project_project__allowed_internal_user_ids
 msgid "Allowed Internal Users"
-msgstr ""
+msgstr "Tillåtna interna användare"
 
 #. module: project
 #: model:ir.model.fields,field_description:project.field_project_project__allowed_portal_user_ids
 msgid "Allowed Portal Users"
-msgstr ""
+msgstr "Tillåtna portalanvändare"
 
 #. module: project
 #: model:ir.model.fields,field_description:project.field_project_project__allowed_user_ids
@@ -685,7 +689,7 @@ msgstr ""
 #. module: project
 #: model_terms:ir.ui.view,arch_db:project.view_task_form2
 msgid "Assign to Me"
-msgstr ""
+msgstr "Tilldela mig"
 
 #. module: project
 #. openerp-web
@@ -716,12 +720,12 @@ msgstr "Tilldelad"
 #. module: project
 #: model:ir.model.fields,field_description:project.field_project_task__date_assign
 msgid "Assigning Date"
-msgstr ""
+msgstr "Tilldelningsdatum"
 
 #. module: project
 #: model:ir.model.fields,field_description:project.field_report_project_task_user__date_assign
 msgid "Assignment Date"
-msgstr ""
+msgstr "Tilldelningsdatum"
 
 #. module: project
 #: model_terms:ir.ui.view,arch_db:project.task_type_edit
@@ -752,7 +756,7 @@ msgstr "augusti"
 #: model_terms:ir.ui.view,arch_db:project.edit_project
 #: model_terms:ir.ui.view,arch_db:project.res_config_settings_view_form
 msgid "Auto-generate tasks for regular activities"
-msgstr ""
+msgstr "Autogenerera aktiviteter för vanliga uppgifter"
 
 #. module: project
 #: model:ir.model.fields,field_description:project.field_project_task_type__auto_validation_kanban_state
@@ -824,18 +828,21 @@ msgid ""
 "By saving this change, the customer email and phone number will also be "
 "updated."
 msgstr ""
+"Genom att spara denna ändring kommer kundens e-post och telefonnummer också "
+"uppdateras."
 
 #. module: project
 #: code:addons/project/models/project.py:0
 #, python-format
 msgid "By saving this change, the customer email will also be updated."
 msgstr ""
+"Genom att spara denna ändring kommer kundens e-post också att uppdateras."
 
 #. module: project
 #: code:addons/project/models/project.py:0
 #, python-format
 msgid "By saving this change, the customer phone number will also be updated."
-msgstr ""
+msgstr "Genom att spara denna ändring uppdateras också kundens telefonnummer."
 
 #. module: project
 #: model_terms:ir.ui.view,arch_db:project.project_delete_wizard_form
@@ -998,7 +1005,7 @@ msgstr ""
 #. module: project
 #: model:ir.model.fields,field_description:project.field_project_task__create_date
 msgid "Created On"
-msgstr ""
+msgstr "Skapad Den"
 
 #. module: project
 #: model:ir.model.fields,field_description:project.field_project_delete_wizard__create_uid
@@ -1049,7 +1056,7 @@ msgstr ""
 #. module: project
 #: model:ir.model.fields,field_description:project.field_project_project__alias_bounced_content
 msgid "Custom Bounced Message"
-msgstr ""
+msgstr "Anpassat studs-meddelande"
 
 #. module: project
 #: code:addons/project/models/project.py:0
@@ -1082,7 +1089,7 @@ msgstr ""
 #: model:ir.model.fields,help:project.field_project_project__access_url
 #: model:ir.model.fields,help:project.field_project_task__access_url
 msgid "Customer Portal URL"
-msgstr ""
+msgstr "URL till kundportal"
 
 #. module: project
 #: model:ir.actions.act_window,name:project.rating_rating_action_project_report
@@ -1199,6 +1206,11 @@ msgid ""
 "- Invited portal and all internal users: employees may see everything.   Portal users may see project and tasks followed by\n"
 "   them or by someone of their company."
 msgstr ""
+"Definierar synlighet för aktiviteterna på projektet:\n"
+"- Inbjudna interna användare: anställda ser bara projekt som de följer.\n"
+"- Alla interna användare: anställda ser alla projekt och aktiviteter.\n"
+"- Inbjudna portal- och inbjudna användare: anställda ser allt. Portalanvändare ser projekt och aktiviteter som de följer\n"
+"   eller om någon i deras organisation följer."
 
 #. module: project
 #: model:ir.actions.server,name:project.unlink_project_action
@@ -1339,7 +1351,7 @@ msgstr "Utkast"
 #. module: project
 #: model_terms:ir.ui.view,arch_db:project.view_task_kanban
 msgid "Dropdown menu"
-msgstr ""
+msgstr "Rullgardinsmeny"
 
 #. module: project
 #: model_terms:ir.ui.view,arch_db:project.view_project_kanban
@@ -1350,7 +1362,7 @@ msgstr "Redigera"
 #. module: project
 #: model_terms:ir.ui.view,arch_db:project.view_task_form2
 msgid "Edit recurring task"
-msgstr ""
+msgstr "Redigera återkommande aktivitet"
 
 #. module: project
 #: model_terms:ir.ui.view,arch_db:project.res_config_settings_view_form
@@ -1358,6 +1370,8 @@ msgid ""
 "Edit tasks' description collaboratively in real time. See each author's text"
 " in a distinct color."
 msgstr ""
+"Redigera aktiviteters beskrivningar gemensamt i realtid. Se varje "
+"författares text i en distinkt färg."
 
 #. module: project
 #. openerp-web
@@ -1376,7 +1390,7 @@ msgstr "E-post"
 #. module: project
 #: model:ir.model.fields,field_description:project.field_project_task__email_from
 msgid "Email From"
-msgstr ""
+msgstr "Epost Från"
 
 #. module: project
 #: model:ir.model.fields,field_description:project.field_project_task_type__mail_template_id
@@ -1386,7 +1400,7 @@ msgstr "E-postmall"
 #. module: project
 #: model:ir.model.fields,field_description:project.field_project_task__email_cc
 msgid "Email cc"
-msgstr ""
+msgstr "E-post cc"
 
 #. module: project
 #: model:ir.model.fields,field_description:project.field_project_task__repeat_until
@@ -1432,7 +1446,7 @@ msgstr ""
 #. module: project
 #: model:ir.model.fields,field_description:project.field_project_project__date
 msgid "Expiration Date"
-msgstr "Utgångsdatum"
+msgstr "Slutdatum"
 
 #. module: project
 #: model_terms:ir.ui.view,arch_db:project.view_task_project_user_search
@@ -1496,7 +1510,7 @@ msgstr "Följda"
 #. module: project
 #: model_terms:ir.ui.view,arch_db:project.view_task_search_form
 msgid "Followed Tasks"
-msgstr ""
+msgstr "Följda aktiviteter"
 
 #. module: project
 #: model:ir.model.fields,field_description:project.field_project_project__message_follower_ids
@@ -1519,13 +1533,13 @@ msgstr "Följare (kontakter)"
 #. module: project
 #: model:ir.model.fields,help:project.field_project_task__activity_type_icon
 msgid "Font awesome icon e.g. fa-tasks"
-msgstr ""
+msgstr "Font awesomeikon t.ex fa-tasks"
 
 #. module: project
 #: model:ir.model.fields.selection,name:project.selection__project_task__repeat_type__forever
 #: model:ir.model.fields.selection,name:project.selection__project_task_recurrence__repeat_type__forever
 msgid "Forever"
-msgstr ""
+msgstr "För alltid"
 
 #. module: project
 #: model:ir.model.fields,field_description:project.field_project_task__fri
@@ -1552,7 +1566,7 @@ msgstr ""
 #. module: project
 #: model_terms:ir.ui.view,arch_db:project.edit_project
 msgid "Get customer feedback"
-msgstr ""
+msgstr "Få kundfeedback"
 
 #. module: project
 #. openerp-web
@@ -1630,6 +1644,11 @@ msgid ""
 "\n"
 "Don't forget to set up the mail templates on the stages for which you want to get the customer's feedbacks."
 msgstr ""
+"Hur får man feedback från kunderna?\n"
+"- Betyg vid byte av etapp: ett e-postmeddelande skickas när en aktivitet flyttas till en annan etapp.\n"
+"- Periodiskt betyg: e-post skickas regelbundet.\n"
+"\n"
+"Glöm inte att ställa in e-postmallarna för de etapper som ni vill få kundernas feedback på."
 
 #. module: project
 #: code:addons/project/models/project.py:0
@@ -1659,6 +1678,8 @@ msgid ""
 "ID of the parent record holding the alias (example: project holding the task"
 " creation alias)"
 msgstr ""
+"ID på överliggande post med aliaset (exempel: projekt som har alias för "
+"skapa uppgift)"
 
 #. module: project
 #: model:ir.model.fields,field_description:project.field_project_task__activity_exception_icon
@@ -1668,7 +1689,7 @@ msgstr "Ikon"
 #. module: project
 #: model:ir.model.fields,help:project.field_project_task__activity_exception_icon
 msgid "Icon to indicate an exception activity."
-msgstr ""
+msgstr "Ikon för att indikera en undantagsaktivitet."
 
 #. module: project
 #. openerp-web
@@ -1693,7 +1714,7 @@ msgstr ""
 #: model:ir.model.fields,help:project.field_project_task__message_has_error
 #: model:ir.model.fields,help:project.field_project_task__message_has_sms_error
 msgid "If checked, some messages have a delivery error."
-msgstr ""
+msgstr "Om markerad har det uppstått leveransfel för vissa meddelanden."
 
 #. module: project
 #: model:ir.model.fields,help:project.field_project_task_type__mail_template_id
@@ -1709,6 +1730,9 @@ msgid ""
 "stage', then an email will be sent to the customer when the task reaches "
 "this step."
 msgstr ""
+"Om den är inställd och om projektets betygsinställning är 'Betyg vid byte av"
+" etapp' skickas ett e-postmeddelande till kunden när aktiviteten når denna "
+"etapp."
 
 #. module: project
 #: model:ir.model.fields,help:project.field_project_project__alias_bounced_content
@@ -1716,6 +1740,8 @@ msgid ""
 "If set, this content will automatically be sent out to unauthorized users "
 "instead of the default message."
 msgstr ""
+"Om angiven kommer detta innehåll automatiskt att skickas ut till obehöriga "
+"användare istället för standardmeddelandet."
 
 #. module: project
 #: model:ir.model.fields,help:project.field_project_project__active
@@ -1795,12 +1821,12 @@ msgstr ""
 #. module: project
 #: model:ir.model.fields.selection,name:project.selection__project_project__privacy_visibility__followers
 msgid "Invited internal users"
-msgstr ""
+msgstr "Inbjudna interna användare"
 
 #. module: project
 #: model:ir.model.fields.selection,name:project.selection__project_project__privacy_visibility__portal
 msgid "Invited portal users and all internal users"
-msgstr ""
+msgstr "Inbjudna portal- och interna användare"
 
 #. module: project
 #: model:ir.model.fields,field_description:project.field_project_project__message_is_follower
@@ -1881,7 +1907,7 @@ msgstr "Senaste"
 #. module: project
 #: model_terms:ir.ui.view,arch_db:project.rating_rating_view_search_project
 msgid "Last 30 Days"
-msgstr ""
+msgstr "Senaste 30 dagarna"
 
 #. module: project
 #: model:ir.model.fields,field_description:project.field_account_analytic_account____last_update
@@ -1941,7 +1967,7 @@ msgstr "Försenade aktiviteter"
 #. module: project
 #: model_terms:ir.ui.view,arch_db:project.view_task_search_form
 msgid "Late Tasks"
-msgstr ""
+msgstr "Utestående aktiviteter"
 
 #. module: project
 #: model_terms:ir.ui.view,arch_db:project.view_task_kanban
@@ -1998,7 +2024,7 @@ msgstr ""
 #. module: project
 #: model:ir.model.fields,help:project.field_project_task__email_cc
 msgid "List of cc from incoming emails."
-msgstr ""
+msgstr "Lista på CC från inkommande e-post"
 
 #. module: project
 #. openerp-web
@@ -2030,7 +2056,7 @@ msgstr "Låg"
 #: model:ir.model.fields,field_description:project.field_project_project__message_main_attachment_id
 #: model:ir.model.fields,field_description:project.field_project_task__message_main_attachment_id
 msgid "Main Attachment"
-msgstr ""
+msgstr "Huvudbilaga"
 
 #. module: project
 #: model:ir.model.fields,field_description:project.field_project_task__attachment_ids
@@ -2083,7 +2109,7 @@ msgstr "Medlemmar"
 #: model:ir.model.fields,field_description:project.field_project_project__message_has_error
 #: model:ir.model.fields,field_description:project.field_project_task__message_has_error
 msgid "Message Delivery error"
-msgstr ""
+msgstr "Fel vid meddelandeleverans"
 
 #. module: project
 #: model:ir.model.fields,field_description:project.field_project_project__message_ids
@@ -2144,7 +2170,7 @@ msgstr "Namn"
 #. module: project
 #: model_terms:ir.ui.view,arch_db:project.edit_project
 msgid "Name of the tasks:"
-msgstr ""
+msgstr "Aktiviteternas namn:"
 
 #. module: project
 #: model:project.task,legend_blocked:project.project_task_10
@@ -2325,7 +2351,7 @@ msgstr "Antal meddelanden som kräver en åtgärd"
 #: model:ir.model.fields,help:project.field_project_project__message_has_error_counter
 #: model:ir.model.fields,help:project.field_project_task__message_has_error_counter
 msgid "Number of messages with delivery error"
-msgstr ""
+msgstr "Antal meddelanden med leveransfel"
 
 #. module: project
 #: model:ir.model.fields,field_description:project.field_project_task_type_delete_wizard__tasks_count
@@ -2369,7 +2395,7 @@ msgstr ""
 #. module: project
 #: model:ir.model.fields,field_description:project.field_digest_digest__kpi_project_task_opened
 msgid "Open Tasks"
-msgstr ""
+msgstr "Öppna aktiviteter"
 
 #. module: project
 #: model:ir.model.fields,help:project.field_project_project__alias_force_thread_id
@@ -2467,7 +2493,7 @@ msgstr ""
 #. module: project
 #: model:ir.model.fields.selection,name:project.selection__project_project__rating_status__periodic
 msgid "Periodical Rating"
-msgstr ""
+msgstr "Periodiskt betyg"
 
 #. module: project
 #: model:ir.model.fields,field_description:project.field_project_project__partner_phone
@@ -2515,7 +2541,7 @@ msgstr ""
 #: model:ir.model.fields,field_description:project.field_project_project__access_url
 #: model:ir.model.fields,field_description:project.field_project_task__access_url
 msgid "Portal Access URL"
-msgstr ""
+msgstr "URL till portal"
 
 #. module: project
 #. openerp-web
@@ -2602,7 +2628,7 @@ msgstr ""
 #. module: project
 #: model:ir.model,name:project.model_project_tags
 msgid "Project Tags"
-msgstr ""
+msgstr "Projektetiketter"
 
 #. module: project
 #: model_terms:ir.ui.view,arch_db:project.project_task_view_activity
@@ -2614,7 +2640,7 @@ msgstr "Projektaktiviteter"
 #. module: project
 #: model:ir.model.fields,field_description:project.field_project_task__project_privacy_visibility
 msgid "Project Visibility"
-msgstr ""
+msgstr "Projektets synlighet"
 
 #. module: project
 #: model:ir.model.fields,help:project.field_project_project__subtask_project_id
@@ -2623,6 +2649,8 @@ msgid ""
 "Project in which sub-tasks of the current project will be created. It can be"
 " the current project itself."
 msgstr ""
+"Projekt där det aktuella projektets underaktiviteter kommer att skapas. Det "
+"kan vara det aktuella projektet själv."
 
 #. module: project
 #: model:ir.actions.act_window,name:project.dblc_proj
@@ -2634,7 +2662,7 @@ msgstr "Projektets aktiviteter"
 #: model:ir.cron,cron_name:project.ir_cron_recurring_tasks
 #: model:ir.cron,name:project.ir_cron_recurring_tasks
 msgid "Project: Create Recurring Tasks"
-msgstr ""
+msgstr "Projekt: Skapa återkommande aktiviteter"
 
 #. module: project
 #: model:ir.actions.server,name:project.ir_cron_rating_project_ir_actions_server
@@ -2708,12 +2736,12 @@ msgstr ""
 #: model_terms:ir.ui.view,arch_db:project.rating_rating_view_form_project
 #: model_terms:ir.ui.view,arch_db:project.view_task_form2
 msgid "Rating"
-msgstr ""
+msgstr "Betyg"
 
 #. module: project
 #: model:ir.model.fields,field_description:project.field_project_task__rating_avg
 msgid "Rating Average"
-msgstr ""
+msgstr "Betyg Medeltal"
 
 #. module: project
 #: model:ir.model.fields,field_description:project.field_project_task_type__rating_template_id
@@ -2728,17 +2756,17 @@ msgstr ""
 #. module: project
 #: model:ir.model.fields,field_description:project.field_project_task__rating_last_feedback
 msgid "Rating Last Feedback"
-msgstr ""
+msgstr "Betyg Senaste Feedback"
 
 #. module: project
 #: model:ir.model.fields,field_description:project.field_project_task__rating_last_image
 msgid "Rating Last Image"
-msgstr ""
+msgstr "Betyg Senaste Bild"
 
 #. module: project
 #: model:ir.model.fields,field_description:project.field_project_task__rating_last_value
 msgid "Rating Last Value"
-msgstr ""
+msgstr "Betyg Senaste Värde"
 
 #. module: project
 #: model:ir.model.fields,field_description:project.field_project_project__rating_request_deadline
@@ -2761,12 +2789,12 @@ msgstr ""
 #. module: project
 #: model:ir.model.fields,field_description:project.field_project_task__rating_count
 msgid "Rating count"
-msgstr ""
+msgstr "Betyg Antal"
 
 #. module: project
 #: model:ir.model.fields.selection,name:project.selection__project_project__rating_status__stage
 msgid "Rating when changing stage"
-msgstr ""
+msgstr "Betyg vid byte av etapp"
 
 #. module: project
 #: model:ir.model.fields,field_description:project.field_project_project__rating_ids
@@ -2812,7 +2840,7 @@ msgstr ""
 #. module: project
 #: model:ir.model.fields,help:project.field_project_task__rating_last_feedback
 msgid "Reason of the rating"
-msgstr ""
+msgstr "Orsaken till betyget"
 
 #. module: project
 #: model:mail.template,subject:project.mail_template_data_project_task
@@ -2840,7 +2868,7 @@ msgstr "Återkommande"
 #. module: project
 #: model:ir.model.fields,field_description:project.field_project_task__recurrence_update
 msgid "Recurrence Update"
-msgstr ""
+msgstr "Repetitionsuppdatering"
 
 #. module: project
 #: model:ir.model.fields,field_description:project.field_project_task__recurring_task
@@ -2852,7 +2880,7 @@ msgstr "Återkommande"
 #: model:ir.model.fields,field_description:project.field_project_task__allow_recurring_tasks
 #: model:ir.model.fields,field_description:project.field_res_config_settings__group_project_recurring_tasks
 msgid "Recurring Tasks"
-msgstr ""
+msgstr "Återkommande aktiviteter"
 
 #. module: project
 #: model:ir.model.fields,field_description:project.field_project_task_type__legend_blocked
@@ -2986,12 +3014,12 @@ msgstr "Ansvarig användare"
 #. module: project
 #: model_terms:ir.ui.view,arch_db:project.view_task_kanban
 msgid "Restore"
-msgstr ""
+msgstr "Återskapa"
 
 #. module: project
 #: model:ir.model.fields,field_description:project.field_project_task__ribbon_message
 msgid "Ribbon message"
-msgstr ""
+msgstr "Banderoll"
 
 #. module: project
 #: model:ir.model.fields,field_description:project.field_project_project__message_has_sms_error
@@ -3103,7 +3131,7 @@ msgstr ""
 #: model_terms:ir.ui.view,arch_db:project.edit_project
 #: model_terms:ir.ui.view,arch_db:project.res_config_settings_view_form
 msgid "Set a Rating Email Template on Stages"
-msgstr ""
+msgstr "Ställ in en e-postmall för betygssättning på etapper"
 
 #. module: project
 #: model:ir.actions.act_window,name:project.project_config_settings_action
@@ -3148,13 +3176,13 @@ msgstr ""
 #: code:addons/project/static/src/js/project_task_kanban_examples.js:0
 #, python-format
 msgid "Specifications"
-msgstr ""
+msgstr "Specifikationer"
 
 #. module: project
 #: model_terms:ir.ui.view,arch_db:project.edit_project
 #: model_terms:ir.ui.view,arch_db:project.res_config_settings_view_form
 msgid "Split your tasks to organize your work into sub-milestones"
-msgstr ""
+msgstr "Dela upp era aktiviteter för att organisera ert arbete i delmål."
 
 #. module: project
 #. openerp-web
@@ -3244,12 +3272,16 @@ msgid ""
 "Today: Activity date is today\n"
 "Planned: Future activities."
 msgstr ""
+"Status baserad på aktiviteter\n"
+"Försenade: Förfallodagen har passerat\n"
+"Idag: Aktivitetsdatum är idag\n"
+"Kommande: Framtida aktiviteter."
 
 #. module: project
 #: model:ir.model.fields,field_description:project.field_project_project__subtask_project_id
 #: model:ir.model.fields,field_description:project.field_project_task__subtask_project_id
 msgid "Sub-task Project"
-msgstr "Underuppgifts projekt"
+msgstr "Underuppgiftsprojekt"
 
 #. module: project
 #: model:ir.model.fields,field_description:project.field_project_task__subtask_count
@@ -3263,7 +3295,7 @@ msgstr "Underuppgifts antal"
 #: model:ir.model.fields,field_description:project.field_res_config_settings__group_subtask_project
 #: model_terms:ir.ui.view,arch_db:project.view_task_form2
 msgid "Sub-tasks"
-msgstr "Underuppgift"
+msgstr "Underaktivitet"
 
 #. module: project
 #: model:ir.model.fields,field_description:project.field_project_task__subtask_planned_hours
@@ -3276,6 +3308,9 @@ msgid ""
 "Sum of the time planned of all the sub-tasks linked to this task. Usually "
 "less or equal to the initially time planned of this task."
 msgstr ""
+"Summan av den planerade tiden för alla underaktiviteter som är länkade till "
+"den här aktiviteten. Vanligtvis mindre eller lika med den initialt planerade"
+" tiden för aktiviteten."
 
 #. module: project
 #: model:ir.model.fields,field_description:project.field_project_task__sun
@@ -3351,12 +3386,12 @@ msgstr ""
 #: model:mail.message.subtype,name:project.mt_project_task_new
 #: model:mail.message.subtype,name:project.mt_task_new
 msgid "Task Created"
-msgstr ""
+msgstr "Aktivitet skapad"
 
 #. module: project
 #: model:ir.model.fields,field_description:project.field_res_config_settings__module_hr_timesheet
 msgid "Task Logs"
-msgstr ""
+msgstr "Aktivitetsloggar"
 
 #. module: project
 #: model:mail.message.subtype,name:project.mt_project_task_rating
@@ -3533,6 +3568,8 @@ msgid ""
 "The project visibility setting doesn't allow portal users to see the "
 "project's tasks. (%s)"
 msgstr ""
+"Projektets synlighetsinställning tillåter inte portalanvändare att se "
+"projektets aktiviteter. (%s)"
 
 #. module: project
 #: code:addons/project/models/project.py:0
@@ -3645,6 +3682,8 @@ msgstr "Tidadministration"
 #: model:ir.model.fields,help:project.field_project_task__planned_hours
 msgid "Time planned to achieve this task (including its sub-tasks)."
 msgstr ""
+"Tid planerad för att utföra den här aktiviteten (inklusive dess "
+"underaktiviteter)."
 
 #. module: project
 #: model:digest.tip,name:project.digest_tip_project_0
@@ -3691,12 +3730,12 @@ msgstr "Dagens aktiviteter"
 #. module: project
 #: model_terms:ir.ui.view,arch_db:project.res_config_settings_view_form
 msgid "Track customer satisfaction on tasks"
-msgstr ""
+msgstr "Spåra kundnöjdhet på aktiviteter"
 
 #. module: project
 #: model_terms:ir.ui.view,arch_db:project.res_config_settings_view_form
 msgid "Track time spent on projects and tasks"
-msgstr ""
+msgstr "Spåra tid som spenderas på projekt och aktiviteter"
 
 #. module: project
 #: model:ir.model.fields,field_description:project.field_project_task__tue
@@ -3718,7 +3757,7 @@ msgstr ""
 #. module: project
 #: model:ir.model.fields,help:project.field_project_task__activity_exception_decoration
 msgid "Type of the exception activity on record."
-msgstr ""
+msgstr "Typ av undantagsaktivitet i posten"
 
 #. module: project
 #: model_terms:ir.ui.view,arch_db:project.view_task_project_user_search
@@ -3761,17 +3800,17 @@ msgstr ""
 #. module: project
 #: model:res.groups,name:project.group_project_rating
 msgid "Use Rating on Project"
-msgstr ""
+msgstr "Använd betyg på projekt"
 
 #. module: project
 #: model:res.groups,name:project.group_project_recurring_tasks
 msgid "Use Recurring Tasks"
-msgstr ""
+msgstr "Använd återkommande aktiviteter"
 
 #. module: project
 #: model:res.groups,name:project.group_subtask_project
 msgid "Use Subtasks"
-msgstr ""
+msgstr "Använd underaktiviteter"
 
 #. module: project
 #: model:ir.model.fields,field_description:project.field_project_project__label_tasks
@@ -3817,7 +3856,7 @@ msgstr "Synlighet"
 #. module: project
 #: model:ir.model.fields,field_description:project.field_project_task__allowed_user_ids
 msgid "Visible to"
-msgstr ""
+msgstr "Synlig för"
 
 #. module: project
 #. openerp-web
@@ -3936,7 +3975,7 @@ msgstr "Årligen"
 #: model:ir.model.fields.selection,name:project.selection__project_task__repeat_unit__year
 #: model:ir.model.fields.selection,name:project.selection__project_task_recurrence__repeat_unit__year
 msgid "Years"
-msgstr ""
+msgstr "År"
 
 #. module: project
 #: model_terms:ir.ui.view,arch_db:project.task_type_edit
@@ -3951,6 +3990,8 @@ msgstr ""
 msgid ""
 "You cannot archive recurring tasks. Please, disable the recurrence first."
 msgstr ""
+"Du kan inte arkivera återkommande aktiviteter. Vänligen inaktivera "
+"upprepningen först."
 
 #. module: project
 #: code:addons/project/models/analytic_account.py:0
@@ -3974,6 +4015,8 @@ msgstr ""
 msgid ""
 "You cannot delete recurring tasks. Please, disable the recurrence first."
 msgstr ""
+"Du kan inte ta bort återkommande aktiviteter. Vänligen inaktivera "
+"upprepningen först."
 
 #. module: project
 #: model_terms:ir.ui.view,arch_db:project.view_project_task_type_delete_wizard

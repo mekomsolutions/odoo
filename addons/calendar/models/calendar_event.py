@@ -474,10 +474,10 @@ class Meeting(models.Model):
             if op in (2, 3):  # Remove partner
                 removed_partner_ids += [command[1]]
             elif op == 6:  # Replace all
-                removed_partner_ids += set(self.partner_ids.ids) - set(command[2])  # Don't recreate attendee if partner already attend the event
-                added_partner_ids += set(command[2]) - set(self.partner_ids.ids)
+                removed_partner_ids += set(self.attendee_ids.mapped('partner_id').ids) - set(command[2])  # Don't recreate attendee if partner already attend the event
+                added_partner_ids += set(command[2]) - set(self.attendee_ids.mapped('partner_id').ids)
             elif op == 4:
-                added_partner_ids += [command[1]] if command[1] not in self.partner_ids.ids else []
+                added_partner_ids += [command[1]] if command[1] not in self.attendee_ids.mapped('partner_id').ids else []
             # commands 0 and 1 not supported
 
         attendees_to_unlink = self.env['calendar.attendee'].search([
@@ -707,8 +707,12 @@ class Meeting(models.Model):
                                 activity_vals['user_id'] = user_id
                             values['activity_ids'] = [(0, 0, activity_vals)]
 
+        # Add commands to create attendees from partners (if present) if no attendee command
+        # is already given (coming from Google event for example).
         vals_list = [
-            dict(vals, attendee_ids=self._attendees_values(vals['partner_ids'])) if 'partner_ids' in vals else vals
+            dict(vals, attendee_ids=self._attendees_values(vals['partner_ids']))
+            if 'partner_ids' in vals and not vals.get('attendee_ids')
+            else vals
             for vals in vals_list
         ]
         recurrence_fields = self._get_recurrent_fields()
@@ -784,6 +788,21 @@ class Meeting(models.Model):
 
         return public_events + my_private_events + obfuscated(others_private_events)
 
+    def name_get(self):
+        """ Hide private events' name for events which don't belong to the current user
+        """
+        hidden = self.filtered(
+            lambda evt:
+                evt.privacy == 'private' and
+                evt.user_id.id != self.env.uid and
+                self.env.user.partner_id not in evt.partner_ids
+        )
+
+        shown = self - hidden
+        shown_names = super(Meeting, shown).name_get()
+        obfuscated_names = [(eid, _('Busy')) for eid in hidden.ids]
+        return shown_names + obfuscated_names
+    
     @api.model
     def read_group(self, domain, fields, groupby, offset=0, limit=None, orderby=False, lazy=True):
         groupby = [groupby] if isinstance(groupby, str) else groupby

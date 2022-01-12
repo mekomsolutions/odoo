@@ -373,12 +373,12 @@ msgstr ""
 #: model_terms:ir.ui.view,arch_db:account.portal_my_invoices
 msgid ""
 "<span class=\"badge badge-pill badge-info\"><i class=\"fa fa-fw fa-clock-o\""
-" aria-label=\"Opened\" title=\"Opened\" role=\"img\"/><span class=\"d-none d"
-"-md-inline\"> Waiting for Payment</span></span>"
+" aria-label=\"Opened\" title=\"Opened\" role=\"img\"/><span class=\"d-none "
+"d-md-inline\"> Waiting for Payment</span></span>"
 msgstr ""
 "<span class=\"badge badge-pill badge-info\"><i class=\"fa fa-fw fa-clock-o\""
-" aria-label=\"Opened\" title=\"Opened\" role=\"img\"/><span class=\"d-none d"
-"-md-inline\">টাকা প্রদানের জন্য অপেক্ষা করছি</span></span>"
+" aria-label=\"Opened\" title=\"Opened\" role=\"img\"/><span class=\"d-none "
+"d-md-inline\">টাকা প্রদানের জন্য অপেক্ষা করছি</span></span>"
 
 #. module: account
 #: model_terms:ir.ui.view,arch_db:account.portal_my_invoices
@@ -6548,6 +6548,12 @@ msgid ""
 msgstr ""
 
 #. module: account
+#: code:addons/account/models/account_move.py:0
+#, python-format
+msgid "It was previously '%(previous)s' and it is now '%(now)s'."
+msgstr ""
+
+#. module: account
 #: model_terms:ir.ui.view,arch_db:account.view_move_form
 msgid "JRNL/2016/00001"
 msgstr ""
@@ -12120,6 +12126,14 @@ msgid "The payment's currency."
 msgstr "পেমেন্টের মুদ্রা"
 
 #. module: account
+#: code:addons/account/models/account_move.py:0
+#, python-format
+msgid ""
+"The recipient bank account link to this invoice is archived.\n"
+"So you cannot confirm the invoice."
+msgstr ""
+
+#. module: account
 #: model:ir.model.fields,help:account.field_account_reconcile_model__match_partner_category_ids
 #: model:ir.model.fields,help:account.field_account_reconcile_model_template__match_partner_category_ids
 msgid ""
@@ -12255,6 +12269,12 @@ msgstr ""
 " করা হয়।"
 
 #. module: account
+#: code:addons/account/models/account_move.py:0
+#, python-format
+msgid "The sequence format has changed."
+msgstr ""
+
+#. module: account
 #: code:addons/account/models/sequence_mixin.py:0
 #, python-format
 msgid ""
@@ -12263,6 +12283,32 @@ msgid ""
 msgstr ""
 "সিকোয়েন্স রেজেক্সে কমপক্ষে সেক গ্রুপিং কীগুলি থাকা উচিত। এই ক্ষেত্রে:\n"
 "^(?P<prefix1>.*?)(?P<seq>\\d*)(?P<suffix>\\D*?)$"
+
+#. module: account
+#: code:addons/account/models/account_move.py:0
+#, python-format
+msgid ""
+"The sequence will never restart.\n"
+"The incrementing number in this case is '%(formatted_seq)s'."
+msgstr ""
+
+#. module: account
+#: code:addons/account/models/account_move.py:0
+#, python-format
+msgid ""
+"The sequence will restart at 1 at the start of every month.\n"
+"The year detected here is '%(year)s' and the month is '%(month)s'.\n"
+"The incrementing number in this case is '%(formatted_seq)s'."
+msgstr ""
+
+#. module: account
+#: code:addons/account/models/account_move.py:0
+#, python-format
+msgid ""
+"The sequence will restart at 1 at the start of every year.\n"
+"The year detected here is '%(year)s'.\n"
+"The incrementing number in this case is '%(formatted_seq)s'."
+msgstr ""
 
 #. module: account
 #: code:addons/account/wizard/account_resequence.py:0
@@ -13470,6 +13516,18 @@ msgstr ""
 msgid ""
 "You can choose different models for each type of reference. The default one "
 "is the Odoo reference."
+msgstr ""
+
+#. module: account
+#: code:addons/account/models/account_journal.py:0
+#, python-format
+msgid ""
+"You can not archive a journal containing draft journal entries.\n"
+"\n"
+"To proceed:\n"
+"1/ click on the top-right button 'Journal Entries' from this journal form\n"
+"2/ then filter on 'Draft' entries\n"
+"3/ select them all and post or delete them through the action menu"
 msgstr ""
 
 #. module: account

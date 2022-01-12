@@ -267,11 +267,13 @@
                                         decoration-success="not is_done and (quantity_done - should_consume_qty == 0)"
                                         decoration-warning="not is_done and (quantity_done - should_consume_qty &gt; 0.0001)"
                                         attrs="{'column_invisible': [('parent.state', '=', 'draft')], 'readonly': [('show_details_visible', '=', True)]}"/>
-                                    <field name="product_uom" attrs="{'readonly': [('state', '!=', 'draft')]}" options="{'no_open': True, 'no_create': True}" groups="uom.group_uom"/>
+                                    <field name="product_uom" attrs="{'readonly': [('state', '!=', 'draft'), ('id', '!=', False)]}" options="{'no_open': True, 'no_create': True}" groups="uom.group_uom"/>
                                     <field name="show_details_visible" invisible="1"/>
                                     <field name="lot_ids" widget="many2many_tags"
                                         groups="stock.group_production_lot" optional="hide"
-                                        attrs="{'invisible': ['|', '|', ('show_details_visible', '=', False), ('has_tracking', '!=', 'serial'), ('parent.state', '=', 'draft')], 'column_invisible': [('parent.show_lot_ids', '=',  False)]}"
+                                        attrs="{'invisible': ['|', '|', ('show_details_visible', '=', False), ('has_tracking', '!=', 'serial'), ('parent.state', '=', 'draft')],
+                                                'readonly': ['|', '|', ('show_details_visible', '=', False), ('has_tracking', '!=', 'serial'), ('parent.state', '=', 'draft')],
+                                                'column_invisible': [('parent.show_lot_ids', '=',  False)]}"
                                         options="{'create': [('parent.use_create_components_lots', '!=', False)]}"
                                         context="{'default_company_id': company_id, 'default_product_id': product_id}"
                                         domain="[('product_id','=',product_id)]"
@@ -282,7 +284,7 @@
                             </field>
                         </page>
                         <page string="Work Orders" name="operations" groups="mrp.group_mrp_routings">
-                            <field name="workorder_ids" attrs="{'readonly': [('state', 'in', ['cancel', 'done'])]}" context="{'tree_view_ref': 'mrp.mrp_production_workorder_tree_editable_view', 'form_view_ref': 'mrp.mrp_production_workorder_form_view_inherit', 'default_product_uom_id': product_uom_id, 'default_consumption': consumption, 'default_company_id': company_id}"/>
+                            <field name="workorder_ids" attrs="{'readonly': [('state', 'in', ['cancel', 'done'])]}" context="{'tree_view_ref': 'mrp.mrp_production_workorder_tree_editable_view', 'default_product_uom_id': product_uom_id, 'default_consumption': consumption, 'default_company_id': company_id}"/>
                         </page>
                         <page string="By-Products" name="finished_products" groups="mrp.group_mrp_byproducts">
                             <field name="move_byproduct_ids" context="{'default_date': date_planned_finished, 'default_date_deadline': date_deadline, 'default_location_id': production_location_id, 'default_location_dest_id': location_src_id, 'default_state': 'draft', 'default_production_id': id, 'default_picking_type_id': picking_type_id, 'default_company_id': company_id}" attrs="{'readonly': ['|', ('state', '=', 'cancel'), '&amp;', ('state', '=', 'done'), ('is_locked', '=', True)]}" options="{'delete': [('state', '=', 'draft')]}">

@@ -469,7 +469,10 @@ class ProductTemplate(models.Model):
         while True:
             domain = templates and [('product_tmpl_id', 'not in', templates.ids)] or []
             args = args if args is not None else []
-            products_ids = Product._name_search(name, args+domain, operator=operator, name_get_uid=name_get_uid)
+            # Product._name_search has default value limit=100
+            # So, we either use that value or override it to None to fetch all products at once
+            kwargs = {} if limit else {'limit': None}
+            products_ids = Product._name_search(name, args+domain, operator=operator, name_get_uid=name_get_uid, **kwargs)
             products = Product.browse(products_ids)
             new_templates = products.mapped('product_tmpl_id')
             if new_templates & templates:
@@ -1125,7 +1128,7 @@ class ProductTemplate(models.Model):
             yield necessary_values
 
         product_template_attribute_values_per_line = [
-            ptal.product_template_value_ids
+            ptal.product_template_value_ids._only_active()
             for ptal in attribute_lines
         ]
 

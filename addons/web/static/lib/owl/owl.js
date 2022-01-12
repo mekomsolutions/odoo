@@ -205,7 +205,7 @@
     let tokenizeString = function (expr) {
         let s = expr[0];
         let start = s;
-        if (s !== "'" && s !== '"') {
+        if (s !== "'" && s !== '"' && s !== "`") {
             return false;
         }
         let i = 1;
@@ -227,6 +227,17 @@
             throw new Error("Invalid expression");
         }
         s += start;
+        if (start === "`") {
+            return {
+                type: "TEMPLATE_STRING",
+                value: s,
+                replace(replacer) {
+                    return s.replace(/\$\{(.*?)\}/g, (match, group) => {
+                        return "${" + replacer(group) + "}";
+                    });
+                },
+            };
+        }
         return { type: "VALUE", value: s };
     };
     let tokenizeNumber = function (expr) {
@@ -320,6 +331,8 @@
     //------------------------------------------------------------------------------
     // Expression "evaluator"
     //------------------------------------------------------------------------------
+    const isLeftSeparator = (token) => token && (token.type === "LEFT_BRACE" || token.type === "COMMA");
+    const isRightSeparator = (token) => token && (token.type === "RIGHT_BRACE" || token.type === "COMMA");
     /**
      * This is the main function exported by this file. This is the code that will
      * process an expression (given as a string) and returns another expression with
@@ -346,15 +359,35 @@
      * the list of variables so it does not get replaced by a lookup in the context
      */
     function compileExprToArray(expr, scope) {
+        const localVars = new Set();
         scope = Object.create(scope);
         const tokens = tokenize(expr);
-        for (let i = 0; i < tokens.length; i++) {
+        let i = 0;
+        let stack = []; // to track last opening [ or {
+        while (i < tokens.length) {
             let token = tokens[i];
             let prevToken = tokens[i - 1];
             let nextToken = tokens[i + 1];
+            let groupType = stack[stack.length - 1];
+            switch (token.type) {
+                case "LEFT_BRACE":
+                case "LEFT_BRACKET":
+                    stack.push(token.type);
+                    break;
+                case "RIGHT_BRACE":
+                case "RIGHT_BRACKET":
+                    stack.pop();
+            }
             let isVar = token.type === "SYMBOL" && !RESERVED_WORDS.includes(token.value);
             if (token.type === "SYMBOL" && !RESERVED_WORDS.includes(token.value)) {
                 if (prevToken) {
+                    // normalize missing tokens: {a} should be equivalent to {a:a}
+                    if (groupType === "LEFT_BRACE" &&
+                        isLeftSeparator(prevToken) &&
+                        isRightSeparator(nextToken)) {
+                        tokens.splice(i + 1, 0, { type: "COLON", value: ":" }, Object.assign({}, token));
+                        nextToken = tokens[i + 1];
+                    }
                     if (prevToken.type === "OPERATOR" && prevToken.value === ".") {
                         isVar = false;
                     }
@@ -365,6 +398,9 @@
                     }
                 }
             }
+            if (token.type === "TEMPLATE_STRING") {
+                token.value = token.replace((expr) => compileExpr(expr, scope));
+            }
             if (nextToken && nextToken.type === "OPERATOR" && nextToken.value === "=>") {
                 if (token.type === "RIGHT_PAREN") {
                     let j = i - 1;
@@ -372,12 +408,14 @@
                         if (tokens[j].type === "SYMBOL" && tokens[j].originalValue) {
                             tokens[j].value = tokens[j].originalValue;
                             scope[tokens[j].value] = { id: tokens[j].value, expr: tokens[j].value };
+                            localVars.add(tokens[j].value);
                         }
                         j--;
                     }
                 }
                 else {
                     scope[token.value] = { id: token.value, expr: token.value };
+                    localVars.add(token.value);
                 }
             }
             if (isVar) {
@@ -389,6 +427,14 @@
                     token.originalValue = token.value;
                     token.value = `scope['${token.value}']`;
                 }
+            }
+            i++;
+        }
+        // Mark all variables that have been used locally.
+        // This assumes the expression has only one scope (incorrect but "good enough for now")
+        for (const token of tokens) {
+            if (token.type === "SYMBOL" && localVars.has(token.value)) {
+                token.isLocal = true;
             }
         }
         return tokens;
@@ -541,8 +587,24 @@
             const tokens = compileExprToArray(expr, this.variables);
             const done = new Set();
             return tokens
-                .map((tok) => {
-                if (tok.varName) {
+                .map((tok, i) => {
+                // "this" in captured expressions should be the current component
+                if (tok.value === "this") {
+                    if (!done.has("this")) {
+                        done.add("this");
+                        this.addLine(`const this_${argId} = utils.getComponent(context);`);
+                    }
+                    tok.value = `this_${argId}`;
+                }
+                // Variables that should be looked up in the scope. isLocal is for arrow
+                // function arguments that should stay untouched (eg "ev => ev" should
+                // not become "const ev_1 = scope['ev']; ev_1 => ev_1")
+                if (tok.varName &&
+                    !tok.isLocal &&
+                    // HACK: for backwards compatibility, we don't capture bare methods
+                    // this allows them to be called with the rendering context/scope
+                    // as their this value.
+                    (!tokens[i + 1] || tokens[i + 1].type !== "LEFT_PAREN")) {
                     if (!done.has(tok.varName)) {
                         done.add(tok.varName);
                         this.addLine(`const ${tok.varName}_${argId} = ${tok.value};`);
@@ -793,7 +855,8 @@
         klass = klass || {};
         elm = vnode.elm;
         for (name in oldClass) {
-            if (name && !klass[name]) {
+            if (name && !klass[name] && !Object.prototype.hasOwnProperty.call(klass, name)) {
+                // was `true` and now not provided
                 elm.classList.remove(name);
             }
         }
@@ -854,16 +917,16 @@
         }
         return map;
     }
-    const hooks = ["create", "update", "remove", "destroy", "pre", "post"];
+    const hooks$1 = ["create", "update", "remove", "destroy", "pre", "post"];
     function init(modules, domApi) {
         let i, j, cbs = {};
         const api = domApi !== undefined ? domApi : htmlDomApi;
-        for (i = 0; i < hooks.length; ++i) {
-            cbs[hooks[i]] = [];
+        for (i = 0; i < hooks$1.length; ++i) {
+            cbs[hooks$1[i]] = [];
             for (j = 0; j < modules.length; ++j) {
-                const hook = modules[j][hooks[i]];
+                const hook = modules[j][hooks$1[i]];
                 if (hook !== undefined) {
-                    cbs[hooks[i]].push(hook);
+                    cbs[hooks$1[i]].push(hook);
                 }
             }
         }
@@ -1401,20 +1464,53 @@
     }
     const UTILS = {
         zero: Symbol("zero"),
-        toObj(expr) {
+        toClassObj(expr) {
+            const result = {};
             if (typeof expr === "string") {
+                // we transform here a list of classes into an object:
+                //  'hey you' becomes {hey: true, you: true}
                 expr = expr.trim();
                 if (!expr) {
                     return {};
                 }
                 let words = expr.split(/\s+/);
-                let result = {};
                 for (let i = 0; i < words.length; i++) {
                     result[words[i]] = true;
                 }
                 return result;
             }
-            return expr;
+            // this is already an object, but we may need to split keys:
+            // {'a b': true, 'a c': false} should become {a: true, b: true, c: false}
+            for (let key in expr) {
+                const value = expr[key];
+                const words = key.split(/\s+/);
+                for (let word of words) {
+                    result[word] = result[word] || value;
+                }
+            }
+            return result;
+        },
+        /**
+         * This method combines the current context with the variables defined in a
+         * scope for use in a slot.
+         *
+         * The implementation is kind of tricky because we want to preserve the
+         * prototype chain structure of the cloned result. So we need to traverse the
+         * prototype chain, cloning each level respectively.
+         */
+        combine(context, scope) {
+            let clone = context;
+            const scopeStack = [];
+            while (!isComponent(scope)) {
+                scopeStack.push(scope);
+                scope = scope.__proto__;
+            }
+            while (scopeStack.length) {
+                let scope = scopeStack.pop();
+                clone = Object.create(clone);
+                Object.assign(clone, scope);
+            }
+            return clone;
         },
         shallowEqual,
         addNameSpace(vnode) {
@@ -1544,6 +1640,9 @@
          * template, with the name given by the t-name attribute.
          */
         addTemplates(xmlstr) {
+            if (!xmlstr) {
+                return;
+            }
             const doc = typeof xmlstr === "string" ? parseXML(xmlstr) : xmlstr;
             const templates = doc.getElementsByTagName("templates")[0];
             if (!templates) {
@@ -1753,7 +1852,7 @@
                 return;
             }
             if (node.tagName !== "t" && node.hasAttribute("t-call")) {
-                const tCallNode = document.createElement("t");
+                const tCallNode = document.implementation.createDocument("http://www.w3.org/1999/xhtml", "t", null).documentElement;
                 tCallNode.setAttribute("t-call", node.getAttribute("t-call"));
                 node.removeAttribute("t-call");
                 node.prepend(tCallNode);
@@ -1780,7 +1879,7 @@
                         throw new Error(`Unknown QWeb directive: '${attrName}'`);
                     }
                     if (node.tagName !== "t" && (attrName === "t-esc" || attrName === "t-raw")) {
-                        const tNode = document.createElement("t");
+                        const tNode = document.implementation.createDocument("http://www.w3.org/1999/xhtml", "t", null).documentElement;
                         tNode.setAttribute(attrName, node.getAttribute(attrName));
                         for (let child of Array.from(node.childNodes)) {
                             tNode.appendChild(child);
@@ -1832,13 +1931,21 @@
                 }
             }
             if (node.nodeName !== "t" || node.hasAttribute("t-tag")) {
-                let nodeID = this._compileGenericNode(node, ctx, withHandlers);
-                ctx = ctx.withParent(nodeID);
                 let nodeHooks = {};
                 let addNodeHook = function (hook, handler) {
                     nodeHooks[hook] = nodeHooks[hook] || [];
                     nodeHooks[hook].push(handler);
                 };
+                if (node.tagName === "select" && node.hasAttribute("t-att-value")) {
+                    const value = node.getAttribute("t-att-value");
+                    let exprId = ctx.generateID();
+                    ctx.addLine(`let expr${exprId} = ${ctx.formatExpression(value)};`);
+                    let expr = `expr${exprId}`;
+                    node.setAttribute("t-att-value", expr);
+                    addNodeHook("create", `n.elm.value=${expr};`);
+                }
+                let nodeID = this._compileGenericNode(node, ctx, withHandlers);
+                ctx = ctx.withParent(nodeID);
                 for (let { directive, value, fullName } of validDirectives) {
                     if (directive.atNodeCreation) {
                         directive.atNodeCreation({
@@ -1909,16 +2016,18 @@
                         isProp = key === "selected" || key === "disabled";
                         break;
                     case "textarea":
-                        isProp = key === "readonly" || key === "disabled";
+                        isProp = key === "readonly" || key === "disabled" || key === "value";
+                        break;
+                    case "select":
+                        isProp = key === "disabled" || key === "value";
                         break;
                     case "button":
-                    case "select":
                     case "optgroup":
                         isProp = key === "disabled";
                         break;
                 }
                 if (isProp) {
-                    props.push(`${key}: _${val}`);
+                    props.push(`${key}: ${val}`);
                 }
             }
             let classObj = "";
@@ -1953,7 +2062,7 @@
                             name = '"' + name + '"';
                         }
                         attrs.push(`${name}: _${attID}`);
-                        handleProperties(name, attID);
+                        handleProperties(name, `_${attID}`);
                     }
                 }
                 // dynamic attributes
@@ -1963,7 +2072,7 @@
                     let formattedValue = typeof v === "string" ? ctx.formatExpression(v) : `scope.${v.id}`;
                     if (attName === "class") {
                         ctx.rootContext.shouldDefineUtils = true;
-                        formattedValue = `utils.toObj(${formattedValue})`;
+                        formattedValue = `utils.toClassObj(${formattedValue})`;
                         if (classObj) {
                             ctx.addLine(`Object.assign(${classObj}, ${formattedValue})`);
                         }
@@ -1988,9 +2097,15 @@
                             const attrIndex = attrs.findIndex((att) => att.startsWith(attName + ":"));
                             attrs.splice(attrIndex, 1);
                         }
-                        ctx.addLine(`let _${attID} = ${formattedValue};`);
-                        attrs.push(`${attName}: _${attID}`);
-                        handleProperties(attName, attID);
+                        if (node.nodeName === "select" && attName === "value") {
+                            attrs.push(`${attName}: ${v}`);
+                            handleProperties(attName, v);
+                        }
+                        else {
+                            ctx.addLine(`let _${attID} = ${formattedValue};`);
+                            attrs.push(`${attName}: _${attID}`);
+                            handleProperties(attName, "_" + attID);
+                        }
                     }
                 }
                 if (name.startsWith("t-attf-")) {
@@ -2420,7 +2535,8 @@
             ctx.addLine(`if (!_${arrayID}) { throw new Error('QWeb error: Invalid loop expression')}`);
             let keysID = ctx.generateID();
             let valuesID = ctx.generateID();
-            ctx.addLine(`let _${keysID} = _${valuesID} = _${arrayID};`);
+            ctx.addLine(`let _${keysID} = _${arrayID};`);
+            ctx.addLine(`let _${valuesID} = _${arrayID};`);
             ctx.addIf(`!(_${arrayID} instanceof Array)`);
             ctx.addLine(`_${keysID} = Object.keys(_${arrayID});`);
             ctx.addLine(`_${valuesID} = Object.values(_${arrayID});`);
@@ -2540,6 +2656,7 @@
             // we need to capture every variable in it
             putInCache = false;
             code = ctx.captureExpression(value);
+            code = `const res = (() => { return ${code} })(); if (typeof res === 'function') { res(e) }`;
         }
         const modCode = mods.map((mod) => modcodes[mod]).join("");
         let handler = `function (e) {if (context.__owl__.status === ${5 /* DESTROYED */}){return}${modCode}${code}}`;
@@ -2647,7 +2764,15 @@
         const durations = (styles.transitionDuration || "").split(", ");
         const timeout = getTimeout(delays, durations);
         if (timeout > 0) {
-            elm.addEventListener("transitionend", cb, { once: true });
+            const transitionEndCB = () => {
+                if (!elm.parentNode)
+                    return;
+                cb();
+                browser.clearTimeout(fallbackTimeout);
+                elm.removeEventListener("transitionend", transitionEndCB);
+            };
+            elm.addEventListener("transitionend", transitionEndCB, { once: true });
+            const fallbackTimeout = browser.setTimeout(transitionEndCB, timeout + 1);
         }
         else {
             cb();
@@ -2810,7 +2935,9 @@
         },
     });
 
-    const config = {};
+    const config = {
+        translatableAttributes: TRANSLATABLE_ATTRS,
+    };
     Object.defineProperty(config, "mode", {
         get() {
             return QWeb.dev ? "dev" : "prod";
@@ -2818,11 +2945,10 @@
         set(mode) {
             QWeb.dev = mode === "dev";
             if (QWeb.dev) {
-                const url = `https://github.com/odoo/owl/blob/master/doc/reference/config.md#mode`;
-                console.warn(`Owl is running in 'dev' mode.  This is not suitable for production use. See ${url} for more information.`);
-            }
-            else {
-                console.log(`Owl is now running in 'prod' mode.`);
+                console.info(`Owl is running in 'dev' mode.
+
+This is not suitable for production use.
+See https://github.com/odoo/owl/blob/master/doc/reference/config.md#mode for more information.`);
             }
         },
     });
@@ -3076,7 +3202,12 @@
                 else if (!name.startsWith("t-")) {
                     if (name !== "class" && name !== "style") {
                         // this is a prop!
-                        props[name] = ctx.formatExpression(value) || "undefined";
+                        if (value.includes("=>")) {
+                            props[name] = ctx.captureExpression(value);
+                        }
+                        else {
+                            props[name] = ctx.formatExpression(value) || "undefined";
+                        }
                     }
                 }
             }
@@ -3085,7 +3216,19 @@
                 .map((k) => k + ":" + props[k])
                 .join(",");
             let componentID = ctx.generateID();
-            const templateKey = ctx.generateTemplateKey();
+            let hasDefinedKey = false;
+            let templateKey;
+            if (node.tagName === "t" && !node.hasAttribute("t-key") && value.match(INTERP_REGEXP)) {
+                defineComponentKey();
+                const id = ctx.generateID();
+                // the ___ is to make sure we have no possible conflict with normal
+                // template keys
+                ctx.addLine(`let k${id} = '___' + componentKey${componentID}`);
+                templateKey = `k${id}`;
+            }
+            else {
+                templateKey = ctx.generateTemplateKey();
+            }
             let ref = node.getAttribute("t-ref");
             let refExpr = "";
             let refKey = "";
@@ -3130,7 +3273,7 @@
                 if (tattClass) {
                     let tattExpr = ctx.formatExpression(tattClass);
                     if (tattExpr[0] !== "{" || tattExpr[tattExpr.length - 1] !== "}") {
-                        tattExpr = `utils.toObj(${tattExpr})`;
+                        tattExpr = `utils.toClassObj(${tattExpr})`;
                     }
                     if (classAttr) {
                         ctx.addLine(`Object.assign(${classObj}, ${tattExpr})`);
@@ -3167,7 +3310,7 @@
             }
             if (hasDynamicProps) {
                 const dynamicProp = ctx.formatExpression(node.getAttribute("t-props"));
-                ctx.addLine(`let props${componentID} = Object.assign({${propStr}}, ${dynamicProp});`);
+                ctx.addLine(`let props${componentID} = Object.assign({}, ${dynamicProp}, {${propStr}});`);
             }
             else {
                 ctx.addLine(`let props${componentID} = {${propStr}};`);
@@ -3182,7 +3325,7 @@
             }
             // SLOTS
             const hasSlots = node.childNodes.length;
-            let scope = hasSlots ? `Object.assign(Object.create(context), scope)` : "undefined";
+            let scope = hasSlots ? `utils.combine(context, scope)` : "undefined";
             ctx.addIf(`w${componentID}`);
             // need to update component
             let styleCode = "";
@@ -3199,9 +3342,15 @@
             }
             ctx.addElse();
             // new component
+            function defineComponentKey() {
+                if (!hasDefinedKey) {
+                    const interpValue = ctx.interpolate(value);
+                    ctx.addLine(`let componentKey${componentID} = ${interpValue};`);
+                    hasDefinedKey = true;
+                }
+            }
+            defineComponentKey();
             const contextualValue = value.match(INTERP_REGEXP) ? "false" : ctx.formatExpression(value);
-            const interpValue = ctx.interpolate(value);
-            ctx.addLine(`let componentKey${componentID} = ${interpValue};`);
             ctx.addLine(`let W${componentID} = ${contextualValue} || context.constructor.components[componentKey${componentID}] || QWeb.components[componentKey${componentID}];`);
             // maybe only do this in dev mode...
             ctx.addLine(`if (!W${componentID}) {throw new Error('Cannot find the definition of component "' + componentKey${componentID} + '"')}`);
@@ -3261,12 +3410,17 @@
                     }
                 }
                 if (clone.childNodes.length) {
+                    let hasContent = false;
                     const t = clone.ownerDocument.createElement("t");
                     for (let child of Object.values(clone.childNodes)) {
+                        hasContent =
+                            hasContent || (child instanceof Text ? Boolean(child.textContent.trim().length) : true);
                         t.appendChild(child);
                     }
-                    const slotFn = qweb._compile(`slot_default_template`, { elem: t, hasParent: true });
-                    QWeb.slots[`${slotId}_default`] = slotFn;
+                    if (hasContent) {
+                        const slotFn = qweb._compile(`slot_default_template`, { elem: t, hasParent: true });
+                        QWeb.slots[`${slotId}_default`] = slotFn;
+                    }
                 }
             }
             ctx.addLine(`let fiber = w${componentID}.__prepare(extra.fiber, ${scope}, () => { const vnode = fiber.vnode; pvnode.sel = vnode.sel; ${createHook}});`);
@@ -3536,6 +3690,7 @@
             // build patchQueue
             const patchQueue = [];
             const doWork = function (f) {
+                f.component.__owl__.currentFiber = null;
                 patchQueue.push(f);
                 return f.child;
             };
@@ -3578,8 +3733,9 @@
                     component.__patch(target, fiber.vnode);
                 }
                 else {
-                    if (fiber.shouldPatch) {
-                        component.__patch(component.__owl__.vnode, fiber.vnode);
+                    const vnode = component.__owl__.vnode;
+                    if (fiber.shouldPatch && vnode) {
+                        component.__patch(vnode, fiber.vnode);
                         // When updating a Component's props (in directive),
                         // the component has a pvnode AND should be patched.
                         // However, its pvnode.elm may have changed if it is a High Order Component
@@ -3591,10 +3747,6 @@
                         component.__patch(document.createElement(fiber.vnode.sel), fiber.vnode);
                         component.__owl__.pvnode.elm = component.__owl__.vnode.elm;
                     }
-                }
-                const compOwl = component.__owl__;
-                if (fiber === compOwl.currentFiber) {
-                    compOwl.currentFiber = null;
                 }
             }
             // insert into the DOM (mount case)
@@ -3687,7 +3839,15 @@
                 this.root.counter = 0;
                 this.root.error = error;
                 scheduler.flush();
-                root.destroy();
+                // at this point, the state of the application is corrupted and we could
+                // have a lot of issues or crashes. So we destroy the application in a try
+                // catch and swallow these errors because the fiber is already in error,
+                // and this is the actual issue that needs to be solved, not those followup
+                // errors.
+                try {
+                    root.destroy();
+                }
+                catch (e) { }
             }
         }
     }
@@ -4241,7 +4401,6 @@
         __callMounted() {
             const __owl__ = this.__owl__;
             __owl__.status = 3 /* MOUNTED */;
-            __owl__.currentFiber = null;
             this.mounted();
             if (__owl__.mountedCB) {
                 __owl__.mountedCB();
@@ -4534,7 +4693,7 @@
             return acc;
         }, []);
     }
-    class Context extends EventBus {
+    class Context$1 extends EventBus {
         constructor(state = {}) {
             super();
             this.rev = 1;
@@ -4647,7 +4806,7 @@
      * will return an observed object (or array).  Changes to that value will then
      * trigger a rerendering of the current component.
      */
-    function useState(state) {
+    function useState$1(state) {
         const component = Component.current;
         const __owl__ = component.__owl__;
         if (!__owl__.observer) {
@@ -4783,7 +4942,7 @@
 
     var _hooks = /*#__PURE__*/Object.freeze({
         __proto__: null,
-        useState: useState,
+        useState: useState$1,
         onMounted: onMounted,
         onWillUnmount: onWillUnmount,
         onWillPatch: onWillPatch,
@@ -4797,7 +4956,7 @@
         useExternalListener: useExternalListener
     });
 
-    class Store extends Context {
+    class Store$1 extends Context$1 {
         constructor(config) {
             super(config.state);
             this.actions = config.actions;
@@ -4836,7 +4995,7 @@
         const component = Component.current;
         const componentId = component.__owl__.id;
         const store = options.store || component.env.store;
-        if (!(store instanceof Store)) {
+        if (!(store instanceof Store$1)) {
             throw new Error(`No store found when connecting '${component.constructor.name}'`);
         }
         let result = selector(store.state, component.props);
@@ -5225,7 +5384,10 @@
             const initialParams = this.currentParams;
             const result = await this.matchAndApplyRules(path);
             if (result.type === "match") {
-                const finalPath = this.routeToPath(result.route, result.params);
+                let finalPath = this.routeToPath(result.route, result.params);
+                if (path.indexOf("?") > -1) {
+                    finalPath += "?" + path.split("?")[1];
+                }
                 const isPopStateEvent = ev && ev instanceof PopStateEvent;
                 if (!isPopStateEvent) {
                     this.setUrlFromPath(finalPath);
@@ -5326,6 +5488,9 @@
             if (route.path === "*") {
                 return {};
             }
+            if (path.indexOf("?") > -1) {
+                path = path.split("?")[0];
+            }
             if (path.startsWith("#")) {
                 path = path.slice(1);
             }
@@ -5377,15 +5542,15 @@
      *
      * Note that dynamic values, such as a date or a commit hash are added by rollup
      */
-    const Context$1 = Context;
-    const useState$1 = useState;
+    const Context = Context$1;
+    const useState = useState$1;
     const core = { EventBus, Observer };
     const router = { Router, RouteComponent, Link };
-    const Store$1 = Store;
+    const Store = Store$1;
     const utils = _utils;
     const tags = _tags;
     const misc = { AsyncRoot, Portal };
-    const hooks$1 = Object.assign({}, _hooks, {
+    const hooks = Object.assign({}, _hooks, {
         useContext: useContext,
         useDispatch: useDispatch,
         useGetters: useGetters,
@@ -5394,26 +5559,28 @@
     const __info__ = {};
 
     exports.Component = Component;
-    exports.Context = Context$1;
+    exports.Context = Context;
     exports.QWeb = QWeb;
-    exports.Store = Store$1;
+    exports.Store = Store;
     exports.__info__ = __info__;
     exports.browser = browser;
     exports.config = config;
     exports.core = core;
-    exports.hooks = hooks$1;
+    exports.hooks = hooks;
     exports.misc = misc;
     exports.mount = mount;
     exports.router = router;
     exports.tags = tags;
-    exports.useState = useState$1;
+    exports.useState = useState;
     exports.utils = utils;
 
+    Object.defineProperty(exports, '__esModule', { value: true });
 
-    __info__.version = '1.3.2';
-    __info__.date = '2021-06-18T08:42:12.863Z';
-    __info__.hash = '2e83c73';
+
+    __info__.version = '1.4.10';
+    __info__.date = '2021-12-07T14:32:29.551Z';
+    __info__.hash = 'bc04f72';
     __info__.url = 'https://github.com/odoo/owl';
 
 
-}(this.owl = this.owl || {}));
+})(this.owl = this.owl || {});

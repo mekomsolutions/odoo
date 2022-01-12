@@ -55,7 +55,7 @@ from .exceptions import AccessError, MissingError, ValidationError, UserError
 from .osv.query import Query
 from .tools import frozendict, lazy_classproperty, ormcache, \
                    Collector, LastOrderedSet, OrderedSet, IterableGenerator, \
-                   groupby
+                   groupby, partition
 from .tools.config import config
 from .tools.func import frame_codeinfo
 from .tools.misc import CountingStream, clean_context, DEFAULT_SERVER_DATETIME_FORMAT, DEFAULT_SERVER_DATE_FORMAT, get_lang
@@ -711,10 +711,16 @@ class BaseModel(MetaModel('DummyModel', (object,), {'_register': False})):
         cls = type(self)
         methods = defaultdict(list)
         for attr, func in getmembers(cls, is_onchange):
+            missing = []
             for name in func._onchange:
                 if name not in cls._fields:
-                    _logger.warning("@onchange%r parameters must be field names", func._onchange)
+                    missing.append(name)
                 methods[name].append(func)
+            if missing:
+                _logger.warning(
+                    "@api.onchange%r parameters must be field names -> not valid: %s",
+                    func._onchange, missing
+                )
 
         # add onchange methods to implement "change_default" on fields
         def onchange_default(field, self):
@@ -1488,15 +1494,9 @@ class BaseModel(MetaModel('DummyModel', (object,), {'_register': False})):
         view = E.calendar(string=self._description)
         view.append(E.field(name=self._rec_name_fallback()))
 
-        if self._date_name not in self._fields:
-            date_found = False
-            for dt in ['date', 'date_start', 'x_date', 'x_date_start']:
-                if dt in self._fields:
-                    self._date_name = dt
-                    break
-            else:
-                raise UserError(_("Insufficient fields for Calendar View!"))
-        view.set('date_start', self._date_name)
+        if not set_first_of([self._date_name, 'date', 'date_start', 'x_date', 'x_date_start'],
+                            self._fields, 'date_start'):
+            raise UserError(_("Insufficient fields for Calendar View!"))
 
         set_first_of(["user_id", "partner_id", "x_user_id", "x_partner_id"],
                      self._fields, 'color')
@@ -2286,9 +2286,11 @@ class BaseModel(MetaModel('DummyModel', (object,), {'_register': False})):
 
         self._apply_ir_rules(query, 'read')
         for gb in groupby_fields:
-            assert gb in self._fields, "Unknown field %r in 'groupby'" % gb
+            if gb not in self._fields:
+                raise UserError(_("Unknown field %r in 'groupby'") % gb)
             gb_field = self._fields[gb].base_field
-            assert gb_field.store and gb_field.column_type, "Fields in 'groupby' must be regular database-persisted fields (no function or related fields), or function fields with store=True"
+            if not (gb_field.store and gb_field.column_type):
+                raise UserError(_("Fields in 'groupby' must be database-persisted fields (no computed fields)"))
 
         aggregated_fields = []
         select_terms = []
@@ -3196,14 +3198,13 @@ Fields:
 
         IrModelData = self.env['ir.model.data'].sudo()
         if self._log_access:
-            res = self.sudo().read(LOG_ACCESS_COLUMNS)
+            res = self.read(LOG_ACCESS_COLUMNS)
         else:
             res = [{'id': x} for x in self.ids]
         xml_data = dict((x['res_id'], x) for x in IrModelData.search_read([('model', '=', self._name),
                                                                            ('res_id', 'in', self.ids)],
                                                                           ['res_id', 'noupdate', 'module', 'name'],
-                                                                          order='id',
-                                                                          limit=1))
+                                                                          order='id DESC'))
         for r in res:
             value = xml_data.get(r['id'], {})
             r['xmlid'] = '%(module)s.%(name)s' % value if value else False
@@ -3616,6 +3617,14 @@ Fields:
                     protected.update(self.pool.field_computed.get(field, [field]))
             if fname == 'company_id' or (field.relational and field.check_company):
                 check_company = True
+
+        # force the computation of fields that are computed with some assigned
+        # fields, but are not assigned themselves
+        to_compute = [field.name
+                      for field in protected
+                      if field.compute and field.name not in vals]
+        if to_compute:
+            self.recompute(to_compute, self)
 
         # protect fields being written against recomputation
         with env.protecting(protected, self):
@@ -4673,13 +4682,13 @@ Fields:
 
         By convention, new records are returned as existing.
         """
-        ids, new_ids = [], []
-        for i in self._ids:
-            (new_ids if isinstance(i, NewId) else ids).append(i)
+        new_ids, ids = partition(lambda i: isinstance(i, NewId), self._ids)
         if not ids:
             return self
-        query = """SELECT id FROM "%s" WHERE id IN %%s""" % self._table
-        self._cr.execute(query, [tuple(ids)])
+        query = Query(self.env.cr, self._table, self._table_query)
+        query.add_where(f'"{self._table}".id IN %s', [tuple(ids)])
+        query_str, params = query.select()
+        self.env.cr.execute(query_str, params)
         valid_ids = set([r[0] for r in self._cr.fetchall()] + new_ids)
         return self.browse(i for i in self._ids if i in valid_ids)
 
@@ -5926,7 +5935,7 @@ Fields:
             presence of ``other_fields``.
         """
         return (field.name in self._onchange_methods) or any(
-            dep in other_fields for dep in self._dependent_fields(field)
+            dep in other_fields for dep in self._dependent_fields(field.base_field)
         )
 
     @api.model
@@ -6193,6 +6202,11 @@ Fields:
         # triggers default_get() on the new record when creating snapshot0
         initial_values = dict(values, **dict.fromkeys(names, False))
 
+        # do not force delegate fields to False
+        for name in self._inherits.values():
+            if not initial_values.get(name, True):
+                initial_values.pop(name)
+
         # create a new record with values
         record = self.new(initial_values, origin=self)
 
@@ -6219,6 +6233,15 @@ Fields:
         protected = [self._fields[name] for name in names]
         with self.env.protecting(protected, record):
             record.modified(todo)
+            for name in todo:
+                field = self._fields[name]
+                if field.inherited:
+                    # modifying an inherited field should modify the parent
+                    # record accordingly; because we don't actually assign the
+                    # modified field on the record, the modification on the
+                    # parent record has to be done explicitly
+                    parent = record[field.related[0]]
+                    parent[name] = record[name]
 
         result = {'warnings': OrderedSet()}
 

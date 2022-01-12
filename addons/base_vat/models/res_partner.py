@@ -69,7 +69,12 @@ _ref_vat = {
     'si': 'SI12345679',
     'sk': 'SK2022749619',
     'sm': 'SM24165',
-    'tr': 'TR1234567890 (VERGINO) or TR17291716060 (TCKIMLIKNO)'  # Levent Karakas @ Eska Yazilim A.S.
+    'tr': 'TR1234567890 (VERGINO) or TR17291716060 (TCKIMLIKNO)',  # Levent Karakas @ Eska Yazilim A.S.
+    'xi': 'XI123456782',
+}
+
+_region_specific_vat_codes = {
+    'xi',
 }
 
 
@@ -140,6 +145,10 @@ class ResPartner(models.Model):
 
     @api.constrains('vat', 'country_id')
     def check_vat(self):
+        # The context key 'no_vat_validation' allows you to store/set a VAT number without doing validations.
+        # This is for API pushes from external platforms where you have no control over VAT numbers.
+        if self.env.context.get('no_vat_validation'):
+            return
         if self.env.context.get('company_id'):
             company = self.env['res.company'].browse(self.env.context['company_id'])
         else:
@@ -148,8 +157,8 @@ class ResPartner(models.Model):
         for partner in self:
             if not partner.vat:
                 continue
-
-            if company.vat_check_vies and partner.commercial_partner_id.country_id in eu_countries:
+            is_eu_country = partner.commercial_partner_id.country_id in eu_countries
+            if company.vat_check_vies and is_eu_country and partner.is_company:
                 # force full VIES online check
                 check_func = self.vies_vat_check
             else:
@@ -159,13 +168,15 @@ class ResPartner(models.Model):
             failed_check = False
             #check with country code as prefix of the TIN
             vat_country_code, vat_number = self._split_vat(partner.vat)
-            vat_guessed_country = self.env['res.country'].search([('code', '=', vat_country_code.upper())])
-            if vat_guessed_country:
+            vat_has_legit_country_code = self.env['res.country'].search([('code', '=', vat_country_code.upper())])
+            if not vat_has_legit_country_code:
+                vat_has_legit_country_code = vat_country_code.lower() in _region_specific_vat_codes
+            if vat_has_legit_country_code:
                 failed_check = not check_func(vat_country_code, vat_number)
 
             #if fails, check with country code from country
             partner_country_code = partner.commercial_partner_id.country_id.code
-            if (not vat_guessed_country or failed_check) and partner_country_code:
+            if (not vat_has_legit_country_code or failed_check) and partner_country_code:
                 failed_check = not check_func(partner_country_code.lower(), partner.vat)
 
             # We allow any number if it doesn't start with a country code and the partner has no country.

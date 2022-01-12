@@ -4,8 +4,10 @@ odoo.define('web_editor.snippets.options', function (require) {
 var core = require('web.core');
 const {ColorpickerWidget} = require('web.Colorpicker');
 const Dialog = require('web.Dialog');
+const {scrollTo} = require('web.dom');
 const rpc = require('web.rpc');
 const time = require('web.time');
+const utils = require('web.utils');
 var Widget = require('web.Widget');
 var ColorPaletteWidget = require('web_editor.ColorPalette').ColorPaletteWidget;
 const weUtils = require('web_editor.utils');
@@ -278,6 +280,16 @@ const UserValueWidget = Widget.extend({
             // initialized yet. No need to prevent that case: asking a non
             // initialized widget to close itself should just not be a problem
             // and just be ignored.
+            return;
+        }
+        if (!this.el.classList.contains('o_we_widget_opened')) {
+            // Small optimization: it would normally not matter asking to
+            // remove a class of an element if it does not already have it but
+            // in this case we do more: we trigger_up an event and ask to close
+            // all sub widgets. When we ask the editor to close all widgets...
+            // it makes sense not letting every sub button of every select
+            // trigger_up an event. This allows to avoid tens of thousands of
+            // instructions being done at each click in the editor.
             return;
         }
         this.trigger_up('user_value_widget_closing');
@@ -936,6 +948,18 @@ const SelectUserValueWidget = BaseSelectionUserValueWidget.extend({
     },
 
     //--------------------------------------------------------------------------
+    // Private
+    //--------------------------------------------------------------------------
+
+    /**
+     * @private
+     * @param {Event} ev
+     */
+    _shouldIgnoreClick(ev) {
+        return !!ev.target.closest('[role="button"]');
+    },
+
+    //--------------------------------------------------------------------------
     // Handlers
     //--------------------------------------------------------------------------
 
@@ -945,7 +969,7 @@ const SelectUserValueWidget = BaseSelectionUserValueWidget.extend({
      * @private
      */
     _onClick: function (ev) {
-        if (ev.target.closest('[role="button"]')) {
+        if (this._shouldIgnoreClick(ev)) {
             return;
         }
 
@@ -1389,6 +1413,12 @@ const ColorpickerUserValueWidget = SelectUserValueWidget.extend({
         }
         return this.colorPalette.appendTo(document.createDocumentFragment());
     },
+    /**
+     * @override
+     */
+    _shouldIgnoreClick(ev) {
+        return ev.originalEvent.__isColorpickerClick || this._super(...arguments);
+    },
 
     //--------------------------------------------------------------------------
     // Handlers
@@ -1441,17 +1471,6 @@ const ColorpickerUserValueWidget = SelectUserValueWidget.extend({
      */
     _onEnterKey: function () {
         this.close();
-    },
-    /**
-     * @override
-     */
-    _onClick: function (ev) {
-        // Do not close the colorpalette on colorpicker click
-        if (ev.originalEvent.__isColorpickerClick) {
-            ev.stopPropagation();
-            return;
-        }
-        return this._super(...arguments);
     },
 });
 
@@ -1786,6 +1805,12 @@ const SelectPagerUserValueWidget = SelectUserValueWidget.extend({
     // Private
     //--------------------------------------------------------------------------
 
+    /**
+     * @override
+     */
+    _shouldIgnoreClick(ev) {
+        return !!ev.target.closest('.o_we_pager_header') || this._super(...arguments);
+    },
     /**
      * Updates the pager's page number display.
      *
@@ -2145,7 +2170,7 @@ const SnippetOptionWidget = Widget.extend({
         hasUserValue = applyCSS.call(this, cssProps[0], values.join(' '), styles) || hasUserValue;
 
         function applyCSS(cssProp, cssValue, styles) {
-            if (!weUtils.areCssValuesEqual(styles[cssProp], cssValue)) {
+            if (!weUtils.areCssValuesEqual(styles[cssProp], cssValue, cssProp, this.$target[0])) {
                 this.$target[0].style.setProperty(cssProp, cssValue, 'important');
                 return true;
             }
@@ -3410,6 +3435,8 @@ const ImageHandlerOption = SnippetOptionWidget.extend({
  * Controls image width and quality.
  */
 registry.ImageOptimize = ImageHandlerOption.extend({
+    MAX_SUGGESTED_WIDTH: 1920,
+
     /**
      * @override
      */
@@ -3434,20 +3461,36 @@ registry.ImageOptimize = ImageHandlerOption.extend({
      * @override
      */
     _computeMaxDisplayWidth() {
-        // TODO: read widths from computed style in case container widths are not default
-        const displayWidth = this._getImg().clientWidth;
-        // If the image is in a column, it might get bigger on smaller screens.
-        // We use col-lg for this in snippets, so they get bigger on the md breakpoint
-        if (this.$target.closest('[class*="col-lg"]').length) {
-            // container and o_container_small have maximum inner width of 690px on the md breakpoint
-            if (this.$target.closest('.container, .o_container_small').length) {
-                return Math.min(1920, Math.max(displayWidth, 690));
-            }
-            // A container-fluid's max inner width is 962px on the md breakpoint
-            return Math.min(1920, Math.max(displayWidth, 962));
+        const img = this._getImg();
+        const computedStyles = window.getComputedStyle(img);
+        const displayWidth = parseFloat(computedStyles.getPropertyValue('width'));
+        const gutterWidth = parseFloat(computedStyles.getPropertyValue('--o-grid-gutter-width')) || 30;
+
+        // For the logos we don't want to suggest a width too small.
+        if (this.$target[0].closest('nav')) {
+            return Math.round(Math.min(displayWidth * 3, this.MAX_SUGGESTED_WIDTH));
+        // If the image is in a container(-small), it might get bigger on
+        // smaller screens. So we suggest the width of the current image unless
+        // it is smaller than the size of the container on the md breapoint
+        // (which is where our bootstrap columns fallback to full container
+        // width since we only use col-lg-* in Odoo).
+        } else if (img.closest('.container, .o_container_small')) {
+            const mdContainerMaxWidth = parseFloat(computedStyles.getPropertyValue('--o-md-container-max-width')) || 720;
+            const mdContainerInnerWidth = mdContainerMaxWidth - gutterWidth;
+            return Math.round(utils.confine(displayWidth, mdContainerInnerWidth, this.MAX_SUGGESTED_WIDTH));
+        // If the image is displayed in a container-fluid, it might also get
+        // bigger on smaller screens. The same way, we suggest the width of the
+        // current image unless it is smaller than the max size of the container
+        // on the md breakpoint (which is the LG breakpoint since the container
+        // fluid is full-width).
+        } else if (img.closest('.container-fluid')) {
+            const lgBp = parseFloat(computedStyles.getPropertyValue('--breakpoint-lg')) || 992;
+            const mdContainerFluidMaxInnerWidth = lgBp - gutterWidth;
+            return Math.round(utils.confine(displayWidth, mdContainerFluidMaxInnerWidth, this.MAX_SUGGESTED_WIDTH));
         }
-        // If it's not in a col-lg, it's probably not going to change size depending on breakpoints
-        return displayWidth;
+        // If it's not in a container, it's probably not going to change size
+        // depending on breakpoints. We still keep a margin safety.
+        return Math.round(Math.min(displayWidth * 1.5, this.MAX_SUGGESTED_WIDTH));
     },
     /**
      * @override
@@ -4245,6 +4288,18 @@ registry.BackgroundPosition = SnippetOptionWidget.extend({
             left: position[0] / 100 * delta.x || 0,
             top: position[1] / 100 * delta.y || 0,
         };
+        // Make sure the element is in a visible area.
+        const rect = this.$target[0].getBoundingClientRect();
+        const viewportTop = $(window).scrollTop();
+        const viewportBottom = viewportTop + $(window).height();
+        const visibleHeight = rect.top < viewportTop
+            ? Math.max(0, Math.min(viewportBottom, rect.bottom) - viewportTop) // Starts above
+            : rect.top < viewportBottom
+                ? Math.min(viewportBottom, rect.bottom) - rect.top // Starts inside
+                : 0; // Starts after
+        if (visibleHeight < 200) {
+            await scrollTo(this.$target[0], {extraOffset: 50});
+        }
         this._toggleBgOverlay(true);
     },
     /**
@@ -4326,7 +4381,7 @@ registry.BackgroundPosition = SnippetOptionWidget.extend({
             height: `${this.$target.innerHeight()}px`,
         });
 
-        const topPos = (parseInt(this.$overlay.css('top')) - parseInt(this.$overlayContent.css('top')));
+        const topPos = Math.max(0, $(window).scrollTop() - this.$target.offset().top);
         this.$overlayContent.find('.o_we_overlay_buttons').css('top', `${topPos}px`);
     },
     /**
